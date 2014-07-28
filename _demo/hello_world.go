@@ -7,6 +7,7 @@ import (
 
 func main() {
 	asp := aspirin.NewAspirin()
+	// asp.ActiveWindow().CreatePane(aspirin.ConcretePane)
 	// asp.CreateWindow()
  	// asp.ActiveWindow().CreatePane(0)
  	// asp.ActiveWindow().CreatePane(0)
