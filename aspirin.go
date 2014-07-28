@@ -3,19 +3,22 @@ package aspirin
 type Aspirin struct {
 	activeWindow int
 	windows []*window
+	windowCounter int
 }
 
 func NewAspirin() *Aspirin {
 	newAspirin := new(Aspirin)
-	newAspirin.CreateWindow()
+	newAspirin.windowCounter = 0
+	newAspirin.CreateWindow("window")
 	return newAspirin
 }
 
-func (ap *Aspirin)CreateWindow() {
-	// lenではなく最後のwindowsのidを使うように修正する
-	w := newWindow(len(ap.windows))
+func (ap *Aspirin)CreateWindow(title string) {
+	w := newWindow(ap.windowCounter, title)
 	ap.windows = append(ap.windows, w)
 	ap.activeWindow = w.id
+	ap.windowCounter += 1
+
 }
 
 func (ap *Aspirin)GetWindows() []*window{

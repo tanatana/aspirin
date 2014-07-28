@@ -9,11 +9,11 @@ type window struct {
 	paneCounter int
 }
 
-func newWindow(id int) *window{
+func newWindow(id int, title string) *window{
 	w        := new(window)
 	w.id      = id
 	w.activePane = -1
-	w.title   = "Aspirin"
+	w.title   = title
 	w.width   = 80
 	w.height  = 24
 	w.paneCounter = 0

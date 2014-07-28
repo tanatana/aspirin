@@ -18,6 +18,4 @@ func main() {
 		fmt.Printf("\t\t%v\n", p)
 	}
 
-
-
 }
