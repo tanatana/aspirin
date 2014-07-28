@@ -32,9 +32,7 @@ func (ap *Aspirin)GetActiveWindow() *window{
 }
 
 func DrawPaneTree(targetPane *pane) {
-	fmt.Printf("\t\t%v\n", &targetPane)
 	fmt.Printf("\t\t%v\n", *targetPane)
-	fmt.Printf("\t\t%v\n",  targetPane)
 	if (targetPane.left != nil){
 		DrawPaneTree(targetPane.left)
 	}

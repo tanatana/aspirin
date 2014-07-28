@@ -62,11 +62,16 @@ func (win *window)SplitPane(targetPane *pane, splitType SplitType) *pane{
 	win.paneCounter += 1
 
 	vp.parent         = targetPane.parent
-	vp.parent.left    = vp
+	if (targetPane.parent.left.id == targetPane.id) {
+		vp.parent.left  = vp
+	} else {
+		vp.parent.right = vp
+	}
 	targetPane.parent = vp
 	vp.left           = targetPane
 	vp.right          = newPane(win.paneCounter, ConcretePane)
 	vp.right.parent   = vp
+
 	win.activePane    = vp.right
 	win.paneCounter += 1
 
