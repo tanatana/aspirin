@@ -13,12 +13,12 @@ func NewAspirin() *Aspirin {
 	return newAspirin
 }
 
-func (ap *Aspirin)CreateWindow(title string) {
+func (ap *Aspirin)CreateWindow(title string) *window{
 	w := newWindow(ap.windowCounter, title)
 	ap.windows = append(ap.windows, w)
 	ap.activeWindow = w.id
 	ap.windowCounter += 1
-
+	return w
 }
 
 func (ap *Aspirin)GetWindows() []*window{
