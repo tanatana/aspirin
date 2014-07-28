@@ -2,7 +2,7 @@
 
 go package for build awsome Text-based User Interface application.
 
-# run demo
+## run demo
 
 ```
 
@@ -14,7 +14,7 @@ go package for build awsome Text-based User Interface application.
 
 ```
 
-# See also
+## See also
 
 http://en.wikipedia.org/wiki/Aspirin
 
