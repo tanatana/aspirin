@@ -34,6 +34,16 @@ func (win *window)GetActivePane() *pane{
 	return win.activePane
 }
 
+func (win *window)SetActivePane(id int) *pane{
+	targetPane := findPaneById(win.rootPane, id)
+	if(targetPane == nil){
+		return nil
+	}
+
+	win.activePane = targetPane
+	return win.activePane
+}
+
 func (win *window)CloseyPane(paneId int){
 }
 
@@ -111,4 +121,18 @@ func (win *window)createConcretePane(targetPane *pane) *pane{
 	win.activePane  = p
 	win.paneCounter += 1
 	return p
+}
+
+func findPaneById(targetPane *pane, id int) *pane {
+	if (targetPane.id == id) {
+		return targetPane
+	}
+
+	if (targetPane.left != nil){
+		return findPaneById(targetPane.left, id)
+	}
+	if (targetPane.right != nil){
+		return findPaneById(targetPane.right, id)
+	}
+	return nil
 }

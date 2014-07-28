@@ -31,14 +31,18 @@ func (ap *Aspirin)GetActiveWindow() *window{
 	return ap.windows[ap.activeWindow]
 }
 
-func DrawPaneTree(targetPane *pane) {
-	fmt.Printf("\t\t%v\n", *targetPane)
+func DrawPaneTree(targetPane *pane, floor int) {
+	fmt.Print("\t\t")
+	for i := 0; i < floor; i++ {
+		fmt.Print("  ")
+	}
+	fmt.Printf("%v\n", *targetPane)
 	if (targetPane.left != nil){
-		DrawPaneTree(targetPane.left)
+		DrawPaneTree(targetPane.left, floor + 1)
 	}
 
 	if (targetPane.right != nil){
-		DrawPaneTree(targetPane.right)
+		DrawPaneTree(targetPane.right, floor + 1)
 	}
 
 }
