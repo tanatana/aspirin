@@ -6,11 +6,11 @@ go package for build awsome Text-based User Interface application.
 
 ```
 
-1. git clone
+1. $ git clone
 
-2. cd aspirin
+2. $ cd aspirin
 
-3. go run _demo/hello_world.go
+3. $ go run _demo/hello_world.go
 
 ```
 
