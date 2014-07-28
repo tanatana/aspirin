@@ -7,16 +7,19 @@ import (
 
 func main() {
 	asp := aspirin.NewAspirin()
-	// asp.ActiveWindow().CreatePane(aspirin.ConcretePane)
+	asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.VirticalSplit)
+	asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.HorizontalSplit)
 	// asp.CreateWindow()
  	// asp.ActiveWindow().CreatePane(0)
  	// asp.ActiveWindow().CreatePane(0)
  	// asp.ActiveWindow().CreatePane(0)
-	fmt.Println(asp)
+	fmt.Println(*asp)
 	for _, window := range asp.GetWindows() {
-		fmt.Printf("\t%v\n", window)
-		p :=window.GetRootPane()
-		fmt.Printf("\t\t%v\n", p)
+		fmt.Printf("\t%v\n", *window)
+		p := window.GetRootPane()
+		aspirin.DrawPaneTree(p)
+
 	}
+
 
 }

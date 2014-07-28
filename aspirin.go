@@ -1,5 +1,7 @@
 package aspirin
 
+import("fmt")
+
 type Aspirin struct {
 	activeWindow int
 	windows []*window
@@ -25,6 +27,20 @@ func (ap *Aspirin)GetWindows() []*window{
 	return ap.windows
 }
 
-func (ap *Aspirin)ActiveWindow() *window{
+func (ap *Aspirin)GetActiveWindow() *window{
 	return ap.windows[ap.activeWindow]
+}
+
+func DrawPaneTree(targetPane *pane) {
+	fmt.Printf("\t\t%v\n", &targetPane)
+	fmt.Printf("\t\t%v\n", *targetPane)
+	fmt.Printf("\t\t%v\n",  targetPane)
+	if (targetPane.left != nil){
+		DrawPaneTree(targetPane.left)
+	}
+
+	if (targetPane.right != nil){
+		DrawPaneTree(targetPane.right)
+	}
+
 }

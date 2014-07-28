@@ -51,5 +51,8 @@ type pane struct{
 }
 
 func newPane(id int, paneType PaneType) *pane{
-	return new(pane)
+	p := new(pane)
+	p.id = id
+	p.paneType = paneType
+	return p
 }

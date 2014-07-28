@@ -30,6 +30,10 @@ func (win *window)GetRootPane() *pane{
 	return win.rootPane
 }
 
+func (win *window)GetActivePane() *pane{
+	return win.activePane
+}
+
 func (win *window)CloseyPane(paneId int){
 }
 
@@ -41,6 +45,34 @@ func (win *window)MoveToPrevPane(){
 
 func (win *window)MoveToPane(targetId int) {
 }
+
+func (win *window)SplitPane(targetPane *pane, splitType SplitType) *pane{
+	if (targetPane.paneType == RootPane) {
+		// TODO: エラーどうしよ
+		return nil
+	}
+
+	var vp *pane
+	if (splitType == VirticalSplit) {
+		vp = newPane(win.paneCounter, VirticalSplitPane)
+	} else if (splitType == HorizontalSplit) {
+		vp = newPane(win.paneCounter, HorizontalSplitPane)
+	}
+	win.activePane   = vp
+	win.paneCounter += 1
+
+	vp.parent         = targetPane.parent
+	vp.parent.left    = vp
+	targetPane.parent = vp
+	vp.left           = targetPane
+	vp.right          = newPane(win.paneCounter, ConcretePane)
+	vp.right.parent   = vp
+	win.activePane    = vp.right
+	win.paneCounter += 1
+
+	return vp.right
+}
+
 
 func (win *window)initializePaneTree() {
 	rp := win.createRootPane()
@@ -57,7 +89,12 @@ func (win *window)createRootPane() *pane{
 }
 
 func (win *window)createConcretePane(targetPane *pane) *pane{
-	p := new(pane)
+	if (targetPane.paneType == ConcretePane) {
+		// TODO: エラーを返す???
+		return nil
+	}
+
+	p :=  newPane(win.paneCounter, ConcretePane)
 	p.parent = targetPane
 
 	if (targetPane.left == nil || targetPane.paneType == RootPane) {
@@ -69,8 +106,4 @@ func (win *window)createConcretePane(targetPane *pane) *pane{
 	win.activePane  = p
 	win.paneCounter += 1
 	return p
-}
-
-func (win *window)splitPane(targetPane *pane, splitType SplitType) *pane{
-	return nil
 }
