@@ -5,7 +5,8 @@ type window struct {
 	activePane int
 	title string
 	width, height int
-	rootPane pane
+	rootPane *rootPane
+	paneCounter int
 }
 
 func newWindow(id int) *window{
@@ -15,12 +16,17 @@ func newWindow(id int) *window{
 	w.title   = "Aspirin"
 	w.width   = 80
 	w.height  = 24
-	w.rootPane = newPane(3)
+	w.paneCounter = 0
+	w.rootPane = newRootPane()
+	// w.rootPane = newRootPane()
+
+	// cp := newConcretePane()
+	// w.rootPane.SetFirstPane(cp)
 
 	return w
 }
 
-func (win *window)GetRootPane() pane{
+func (win *window)GetRootPane() *rootPane{
 	return win.rootPane
 }
 
