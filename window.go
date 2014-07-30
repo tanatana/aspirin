@@ -43,6 +43,14 @@ func (win *window)SetActivePane(id int) *pane{
 	return win.activePane
 }
 
+func  (win *window)SetSize(width, height int) *window{
+	// miniPane実装後はこうなるはず
+	// win.width  = width - win.miniPane.height
+	win.width  = width
+	win.height = height
+	return win
+}
+
 func (win *window)CloseyPane(paneId int){
 }
 

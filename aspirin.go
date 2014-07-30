@@ -6,13 +6,18 @@ type Aspirin struct {
 	activeWindow int
 	windows []*window
 	windowCounter int
+	width, height int
+	screen []string
 }
 
 func NewAspirin() *Aspirin {
-	newAspirin := new(Aspirin)
-	newAspirin.windowCounter = 0
-	newAspirin.CreateWindow("window")
-	return newAspirin
+	ap := new(Aspirin)
+	ap.windowCounter = 0
+	ap.width  = 80
+	ap.height = 24
+	w := ap.CreateWindow("window")
+	w.SetSize(ap.width, ap.height)
+	return ap
 }
 
 func (ap *Aspirin)CreateWindow(title string) *window{
@@ -31,6 +36,12 @@ func (ap *Aspirin)GetActiveWindow() *window{
 	return ap.windows[ap.activeWindow]
 }
 
+func (ap *Aspirin)Draw() *window{
+	return ap.windows[ap.activeWindow]
+}
+
+
+// print aspirin state for debugging
 func DrawPaneTree(targetPane *pane, floor int) {
 	fmt.Print("\t\t")
 	for i := 0; i < floor; i++ {
