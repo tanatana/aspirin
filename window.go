@@ -21,8 +21,6 @@ func newWindow(id int, title string) *window{
 
 	w.initializePaneTree()
 
-	// w.rootPane = w.createRootPane()
-
 	return w
 }
 
@@ -35,6 +33,7 @@ func (win *window)GetActivePane() *pane{
 }
 
 func (win *window)SetActivePane(id int) *pane{
+	// concretePaneいがいがActivePaneになるの許可しない方がよさそう
 	targetPane := findPaneById(win.rootPane, id)
 	if(targetPane == nil){
 		return nil
