@@ -18,7 +18,6 @@ func newWindow(id int, title string) *window{
 	w.width   = 80
 	w.height  = 24
 	w.paneCounter = 0
-
 	w.initializePaneTree()
 
 	return w

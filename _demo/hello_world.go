@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"../../aspirin"
+	"time"
 )
 
 func main() {
@@ -14,13 +15,12 @@ func main() {
 	asp.GetActiveWindow().SetActivePane(1)
 	asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.HorizontalSplit)
 
-	fmt.Println(*asp)
+
+	time.Sleep(time.Second)
 	for _, window := range asp.GetWindows() {
 		fmt.Printf("\t%v\n", *window)
 		p := window.GetRootPane()
 		aspirin.DrawPaneTree(p, 0)
-
 	}
-
 
 }

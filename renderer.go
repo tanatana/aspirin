@@ -1,7 +1,7 @@
 package aspirin
 
-type Renderer interface {
-	Rendering()
+type Renderable interface {
+	rendering()
 }
 
 type defaultRenderer struct {
@@ -14,6 +14,28 @@ func newDefaultRenderer(p *pane) *defaultRenderer{
 	return dr
 }
 
-func (dr *defaultRenderer) Rendering(contents []string, line int) {
+func (dr *defaultRenderer) rendering(contents []string, line int) []string{
+	var view []string
+	for _, line := range contents {
+		view = append(view, line)
+	}
 
+	return view
+}
+
+type HelloWorldRenderer struct {
+	targetPane *pane
+}
+
+func newHelloWorldRenderer(p *pane) *HelloWorldRenderer{
+	hr := new(HelloWorldRenderer)
+	hr.targetPane = p
+	return hr
+}
+
+func (hr *HelloWorldRenderer) rendering(contents []string, line int) []string{
+	var view []string
+	view = append (view, "Hello World!")
+
+	return view
 }
