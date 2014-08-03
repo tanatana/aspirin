@@ -33,8 +33,8 @@ func (s *screen)Start() {
 		num := 0
 		for {
 			s.Flush()
-			// s.Print()
-			s.Print2(num)
+			s.Print()
+			// s.Print2(num)
 			time.Sleep(time.Duration(1000/s.fps) * time.Millisecond)
 			num += 1
 		}

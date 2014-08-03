@@ -18,7 +18,7 @@ func main() {
 
 	time.Sleep(time.Second)
 	for _, window := range asp.GetWindows() {
-		fmt.Printf("\t%v\n", *window)
+		fmt.Printf("%v\n", *window)
 		p := window.GetRootPane()
 		aspirin.DrawPaneTree(p, 0)
 	}
