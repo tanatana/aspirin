@@ -58,3 +58,13 @@ func newPane(id int, paneType PaneType, x, y, width, height int) *pane{
 	p.paneType = paneType
 	return p
 }
+
+func (p *pane)setPosition(x, y int) {
+	p.x = x
+	p.y = y
+}
+
+func (p *pane)setSize(width, height int) {
+	p.width = width
+	p.height = height
+}
