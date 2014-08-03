@@ -6,19 +6,15 @@ type Aspirin struct {
 	activeWindow int
 	windows []*window
 	windowCounter int
-	width,height int
-	screen *screen
+	width, height int
 }
 
-func NewAspirin(height, width) *Aspirin {
+func NewAspirin() *Aspirin {
 	ap := new(Aspirin)
 	ap.windowCounter = 0
 	ap.width         = 80
 	ap.height        = 24
-	ap.screen        = newScreen(ap.width, ap.height, 30)
 	ap.CreateWindow("window")
-
-	ap.screen.Start()
 
 	return ap
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"../../aspirin"
-	"time"
 )
 
 func main() {
@@ -16,7 +15,6 @@ func main() {
 	asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.HorizontalSplit)
 
 
-	time.Sleep(time.Second)
 	for _, window := range asp.GetWindows() {
 		fmt.Printf("%v\n", *window)
 		p := window.GetRootPane()
