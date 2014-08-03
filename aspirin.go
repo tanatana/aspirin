@@ -20,7 +20,7 @@ func NewAspirin() *Aspirin {
 }
 
 func (ap *Aspirin)CreateWindow(title string) *window{
-	w := newWindow(ap.windowCounter, title)
+	w := newWindow(ap.windowCounter, title, ap.width, ap.height)
 	ap.windows = append(ap.windows, w)
 	ap.activeWindow = w.id
 	ap.windowCounter += 1

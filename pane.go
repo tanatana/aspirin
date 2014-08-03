@@ -50,9 +50,11 @@ type pane struct{
 	width, height int
 }
 
-func newPane(id int, paneType PaneType) *pane{
+func newPane(id int, paneType PaneType, width, height int) *pane{
 	p := new(pane)
 	p.id = id
+	p.width  = width
+	p.height = height
 	p.paneType = paneType
 	return p
 }
