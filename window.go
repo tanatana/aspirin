@@ -70,9 +70,9 @@ func (win *window)SplitPane(targetPane *pane, splitType SplitType) *pane{
 
 	var sp *pane
 	if (splitType == VirticalSplit) {
-		sp = newPane(win.paneCounter, VirticalSplitPane, targetPane.width, 1)
+		sp = newPane(win.paneCounter, VirticalSplitPane, 0, 0, targetPane.width, 1)
 	} else if (splitType == HorizontalSplit) {
-		sp = newPane(win.paneCounter, HorizontalSplitPane, 1, targetPane.height)
+		sp = newPane(win.paneCounter, HorizontalSplitPane, 0, 0, 1, targetPane.height)
 	}
 	win.activePane   = sp
 	win.paneCounter += 1
@@ -85,7 +85,7 @@ func (win *window)SplitPane(targetPane *pane, splitType SplitType) *pane{
 	}
 	targetPane.parent = sp
 	sp.left           = targetPane
-	sp.right          = newPane(win.paneCounter, ConcretePane, win.width, win.height)
+	sp.right          = newPane(win.paneCounter, ConcretePane, 0, 0, win.width, win.height)
 	sp.right.parent   = sp
 
 	win.activePane    = sp.right
@@ -102,7 +102,7 @@ func (win *window)initializePaneTree() {
 }
 
 func (win *window)createRootPane() *pane{
-	rp := newPane(win.paneCounter, RootPane, win.width, win.height)
+	rp := newPane(win.paneCounter, RootPane, 0, 0, win.width, win.height)
 
 	win.activePane   = rp
 	win.paneCounter += 1
@@ -115,7 +115,7 @@ func (win *window)createConcretePane(targetPane *pane) *pane{
 		return nil
 	}
 
-	p :=  newPane(win.paneCounter, ConcretePane, win.width, win.height)
+	p :=  newPane(win.paneCounter, ConcretePane, 0, 0, win.width, win.height)
 	p.parent = targetPane
 
 	if (targetPane.left == nil || targetPane.paneType == RootPane) {
