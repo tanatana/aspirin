@@ -43,6 +43,7 @@ func (ap *Aspirin)Draw() *window{
 	return ap.windows[ap.activeWindow]
 }
 
+// print aspirin state for debugging
 func print_tb(x, y int, fg, bg termbox.Attribute, msg string) {
 	for _, c := range msg {
 		termbox.SetCell(x, y, c, fg, bg)
@@ -55,7 +56,6 @@ func printf_tb(x, y int, fg, bg termbox.Attribute, format string, args ...interf
 	print_tb(x, y, fg, bg, s)
 }
 
-// print aspirin state for debugging
 func (ap *Aspirin)DrawStatus() {
 	drawLine := 0
 	var drawPaneTree func(targetPane *pane, floor int)
