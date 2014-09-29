@@ -17,25 +17,21 @@ func main() {
 	width, height := termbox.Size()
 
 	asp := aspirin.NewAspirin(width, height)
+	// asp.CreateWindow("test")
 	// tmux で例えると `C-t %` => `C-t "` => `C-t o` => `C-t "`
 	asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.VirticalSplit)
 	asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.HorizontalSplit)
 	asp.GetActiveWindow().SetActivePane(1)
 	asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.HorizontalSplit)
-
-	fmt.Printf("%s\n", "press 'q' to quit")
-	for _, window := range asp.GetWindows() {
-		fmt.Printf("%v\n", *window)
-		p := window.GetRootPane()
-		aspirin.DrawPaneTree(p, 0)
-	}
-
+	asp.DrawStatus()
 loop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			if ev.Ch == 113 {
 				break loop
+			} else {
+				asp.DrawStatus()
 			}
 		}
 	}
