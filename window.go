@@ -9,14 +9,14 @@ type window struct {
 	paneCounter int
 }
 
-func newWindow(id int, title string) *window{
+func newWindow(id int, title string, width, height int) *window{
 	// TODO: get terminal's width & height
 	// TODO: create mini-pane like emacs's mini-buffer
 	w        := new(window)
 	w.id      = id
 	w.title   = title
-	w.width   = 80
-	w.height  = 24
+	w.width   = width
+	w.height  = height
 	w.paneCounter = 0
 	w.initializePaneTree()
 
@@ -68,30 +68,30 @@ func (win *window)SplitPane(targetPane *pane, splitType SplitType) *pane{
 		return nil
 	}
 
-	var vp *pane
+	var sp *pane
 	if (splitType == VirticalSplit) {
-		vp = newPane(win.paneCounter, VirticalSplitPane)
+		sp = newPane(win.paneCounter, VirticalSplitPane, 0, 0, targetPane.width, 1)
 	} else if (splitType == HorizontalSplit) {
-		vp = newPane(win.paneCounter, HorizontalSplitPane)
+		sp = newPane(win.paneCounter, HorizontalSplitPane, 0, 0, 1, targetPane.height)
 	}
-	win.activePane   = vp
+	win.activePane   = sp
 	win.paneCounter += 1
 
-	vp.parent         = targetPane.parent
+	sp.parent         = targetPane.parent
 	if (targetPane.parent.left.id == targetPane.id) {
-		vp.parent.left  = vp
+		sp.parent.left  = sp
 	} else {
-		vp.parent.right = vp
+		sp.parent.right = sp
 	}
-	targetPane.parent = vp
-	vp.left           = targetPane
-	vp.right          = newPane(win.paneCounter, ConcretePane)
-	vp.right.parent   = vp
+	targetPane.parent = sp
+	sp.left           = targetPane
+	sp.right          = newPane(win.paneCounter, ConcretePane, 0, 0, win.width, win.height)
+	sp.right.parent   = sp
 
-	win.activePane    = vp.right
+	win.activePane    = sp.right
 	win.paneCounter += 1
 
-	return vp.right
+	return sp.right
 }
 
 
@@ -102,7 +102,7 @@ func (win *window)initializePaneTree() {
 }
 
 func (win *window)createRootPane() *pane{
-	rp := newPane(win.paneCounter, RootPane)
+	rp := newPane(win.paneCounter, RootPane, 0, 0, win.width, win.height)
 
 	win.activePane   = rp
 	win.paneCounter += 1
@@ -115,7 +115,7 @@ func (win *window)createConcretePane(targetPane *pane) *pane{
 		return nil
 	}
 
-	p :=  newPane(win.paneCounter, ConcretePane)
+	p :=  newPane(win.paneCounter, ConcretePane, 0, 0, win.width, win.height)
 	p.parent = targetPane
 
 	if (targetPane.left == nil || targetPane.paneType == RootPane) {
