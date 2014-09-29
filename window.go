@@ -10,7 +10,6 @@ type window struct {
 }
 
 func newWindow(id int, title string, width, height int) *window{
-	// TODO: get terminal's width & height
 	// TODO: create mini-pane like emacs's mini-buffer
 	w        := new(window)
 	w.id      = id
@@ -65,19 +64,38 @@ func (win *window)MoveToPane(targetId int) {
 func (win *window)SplitPane(targetPane *pane, splitType SplitType) *pane{
 	if (targetPane.paneType == RootPane) {
 		// TODO: エラーどうしよ
-		return nil
+		panic("can't split")
 	}
-
 	var sp *pane
+	var leftPaneSize, rightPaneSize PaneSize
+
 	if (splitType == VirticalSplit) {
-		sp = newPane(win.paneCounter, VirticalSplitPane, 0, 0, targetPane.width, 1)
+		sp = newPane(win.paneCounter, VirticalSplitPane, targetPane.x + targetPane.width/2, targetPane.y, 1, targetPane.height)
+		leftPaneSize.x      = targetPane.x
+		leftPaneSize.y      = targetPane.y
+		leftPaneSize.width  = targetPane.width/2
+		leftPaneSize.height = targetPane.height
+
+		rightPaneSize.x      = targetPane.x + targetPane.width/2
+		rightPaneSize.y      = targetPane.y
+		rightPaneSize.width  = targetPane.width/2
+		rightPaneSize.height = targetPane.height
 	} else if (splitType == HorizontalSplit) {
-		sp = newPane(win.paneCounter, HorizontalSplitPane, 0, 0, 1, targetPane.height)
+		sp = newPane(win.paneCounter, HorizontalSplitPane, targetPane.x, targetPane.y + targetPane.height/2, targetPane.width, 1)
+		leftPaneSize.x      = targetPane.x
+		leftPaneSize.y      = targetPane.y
+		leftPaneSize.width  = targetPane.width
+		leftPaneSize.height = targetPane.height/2
+
+		rightPaneSize.x      = targetPane.x
+		rightPaneSize.y      = targetPane.y + targetPane.height/2
+		rightPaneSize.width  = targetPane.width
+		rightPaneSize.height = targetPane.height/2
 	}
 	win.activePane   = sp
 	win.paneCounter += 1
 
-	sp.parent         = targetPane.parent
+	sp.parent = targetPane.parent
 	if (targetPane.parent.left.id == targetPane.id) {
 		sp.parent.left  = sp
 	} else {
@@ -85,9 +103,12 @@ func (win *window)SplitPane(targetPane *pane, splitType SplitType) *pane{
 	}
 	targetPane.parent = sp
 	sp.left           = targetPane
+	sp.left.setSize(leftPaneSize.width, leftPaneSize.height);
+	sp.left.setPosition(leftPaneSize.x, leftPaneSize.y);
 	sp.right          = newPane(win.paneCounter, ConcretePane, 0, 0, win.width, win.height)
 	sp.right.parent   = sp
-
+	sp.right.setSize(rightPaneSize.width, rightPaneSize.height);
+	sp.right.setPosition(rightPaneSize.x, rightPaneSize.y);
 	win.activePane    = sp.right
 	win.paneCounter += 1
 
@@ -128,6 +149,22 @@ func (win *window)createConcretePane(targetPane *pane) *pane{
 	win.paneCounter += 1
 	return p
 }
+
+func (win *window)refleshPaneTree(rootPane *pane) {
+	rootPane.reflesh()
+	if (rootPane.left != nil){
+		win.refleshPaneTree(rootPane.left)
+	}
+	if (rootPane.right != nil){
+		win.refleshPaneTree(rootPane.right)
+	}
+	return
+}
+
+func (win *window)refleshPane(targetPane *pane) {
+	targetPane.reflesh()
+}
+
 
 func findPaneById(targetPane *pane, id int) *pane {
 	if (targetPane.id == id) {

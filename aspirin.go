@@ -39,8 +39,10 @@ func (ap *Aspirin)GetActiveWindow() *window{
 	return ap.windows[ap.activeWindow]
 }
 
-func (ap *Aspirin)Draw() *window{
-	return ap.windows[ap.activeWindow]
+func (ap *Aspirin)Reflesh() {
+	win := ap.windows[ap.activeWindow]
+	win.refleshPaneTree(win.GetRootPane())
+	termbox.Flush();
 }
 
 // print aspirin state for debugging
