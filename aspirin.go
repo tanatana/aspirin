@@ -10,6 +10,7 @@ type Aspirin struct {
 	windows []*window
 	windowCounter int
 	width, height int
+	debug bool
 }
 
 func NewAspirin(width int, height int) *Aspirin {
@@ -38,10 +39,13 @@ func (ap *Aspirin)GetActiveWindow() *window{
 	return ap.windows[ap.activeWindow]
 }
 
-func (ap *Aspirin)Draw() *window{
-	return ap.windows[ap.activeWindow]
+func (ap *Aspirin)Reflesh() {
+	win := ap.windows[ap.activeWindow]
+	win.refleshPaneTree(win.GetRootPane())
+	termbox.Flush();
 }
 
+// print aspirin state for debugging
 func print_tb(x, y int, fg, bg termbox.Attribute, msg string) {
 	for _, c := range msg {
 		termbox.SetCell(x, y, c, fg, bg)
@@ -54,20 +58,26 @@ func printf_tb(x, y int, fg, bg termbox.Attribute, format string, args ...interf
 	print_tb(x, y, fg, bg, s)
 }
 
-// print aspirin state for debugging
-func DrawPaneTree(targetPane *pane, floor int) {
-	fmt.Print("  ")
-	for i := 0; i < floor; i++ {
-		fmt.Print("  ")
+func (ap *Aspirin)DrawStatus() {
+	drawLine := 0
+	var drawPaneTree func(targetPane *pane, floor int)
+	drawPaneTree = func (targetPane *pane, floor int) {
+		printf_tb((floor + 1) * 2, drawLine, termbox.ColorWhite, termbox.ColorBlack, "%v", *targetPane)
+		drawLine += 1
+		if (targetPane.left != nil){
+			drawPaneTree(targetPane.left, floor + 1)
+		}
+		if (targetPane.right != nil){
+			drawPaneTree(targetPane.right, floor + 1)
+		}
 	}
-	printf_tb(0, targetPane.id + 1, termbox.ColorWhite, termbox.ColorBlack, "%v", *targetPane)
+
+	for _, window := range ap.GetWindows() {
+		printf_tb(0, drawLine, termbox.ColorWhite, termbox.ColorBlack, "%v", *window)
+		drawLine += 1
+		p := window.GetRootPane()
+		drawPaneTree(p, 1)
+	}
+
 	termbox.Flush()
-
-	if (targetPane.left != nil){
-		DrawPaneTree(targetPane.left, floor + 1)
-	}
-	if (targetPane.right != nil){
-		DrawPaneTree(targetPane.right, floor + 1)
-	}
-
 }

@@ -1,6 +1,13 @@
 package aspirin
 
+import (
+	"github.com/nsf/termbox-go"
+)
+
 type PaneType int
+type PaneSize struct {
+	x, y, width, height int
+}
 
 const (
 	RootPane PaneType = iota
@@ -50,9 +57,25 @@ type pane struct{
 	width, height int
 }
 
+func (p *pane)reflesh() {
+	if (p.paneType == VirticalSplitPane) {
+		for i := p.y; i < (p.y + p.height); i++ {
+			termbox.SetCell(p.x, i, '|', termbox.ColorGreen, termbox.ColorDefault)
+		}
+	}
+	if (p.paneType == HorizontalSplitPane) {
+		for i := p.x; i < (p.x + p.width); i++ {
+			termbox.SetCell(i, p.y, '-', termbox.ColorGreen, termbox.ColorDefault)
+		}
+
+	}
+}
+
 func newPane(id int, paneType PaneType, x, y, width, height int) *pane{
 	p := new(pane)
 	p.id = id
+	p.x  = x
+	p.y  = y
 	p.width  = width
 	p.height = height
 	p.paneType = paneType
@@ -65,6 +88,6 @@ func (p *pane)setPosition(x, y int) {
 }
 
 func (p *pane)setSize(width, height int) {
-	p.width = width
+	p.width  = width
 	p.height = height
 }
