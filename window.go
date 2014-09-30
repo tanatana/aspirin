@@ -73,24 +73,33 @@ func (win *window)SplitPane(targetPane *pane, splitType SplitType) *pane{
 		sp = newPane(win.paneCounter, VirticalSplitPane, targetPane.x + targetPane.width/2, targetPane.y, 1, targetPane.height)
 		leftPaneSize.x      = targetPane.x
 		leftPaneSize.y      = targetPane.y
-		leftPaneSize.width  = targetPane.width/2
+		leftPaneSize.width  = targetPane.width/2 - 1
 		leftPaneSize.height = targetPane.height
 
-		rightPaneSize.x      = targetPane.x + targetPane.width/2
+		rightPaneSize.x      = targetPane.x + targetPane.width/2 + 1
 		rightPaneSize.y      = targetPane.y
-		rightPaneSize.width  = targetPane.width/2
+		rightPaneSize.width  = targetPane.width/2 - 1
 		rightPaneSize.height = targetPane.height
+
+		if targetPane.width % 2 == 1 {
+			rightPaneSize.width += 1
+		}
 	} else if (splitType == HorizontalSplit) {
 		sp = newPane(win.paneCounter, HorizontalSplitPane, targetPane.x, targetPane.y + targetPane.height/2, targetPane.width, 1)
 		leftPaneSize.x      = targetPane.x
 		leftPaneSize.y      = targetPane.y
 		leftPaneSize.width  = targetPane.width
-		leftPaneSize.height = targetPane.height/2
+		leftPaneSize.height = targetPane.height/2 - 1
 
 		rightPaneSize.x      = targetPane.x
-		rightPaneSize.y      = targetPane.y + targetPane.height/2
+		rightPaneSize.y      = targetPane.y + targetPane.height/2 + 1
 		rightPaneSize.width  = targetPane.width
-		rightPaneSize.height = targetPane.height/2
+		rightPaneSize.height = targetPane.height/2 - 1
+
+		if targetPane.height % 2 == 1 {
+			rightPaneSize.height += 1
+		}
+
 	}
 	win.activePane   = sp
 	win.paneCounter += 1
