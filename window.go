@@ -49,7 +49,31 @@ func  (win *window)SetSize(width, height int) *window{
 	return win
 }
 
-func (win *window)CloseyPane(paneId int){
+func (win *window)ClosePane(target *pane) {
+	parent := target.parent
+	if (parent.paneType == RootPane) {
+		// TODO: エラーどうしよ
+		panic("can't split")
+	}
+	newParent := parent.parent
+	keep := parent.left
+
+	if keep.id == target.id {
+		 keep = parent.right
+	}
+
+	// merge adjoining pane
+	newPaneSize := calcMergedPaneSize(target, keep, parent)
+	keep.setSize(newPaneSize.width, newPaneSize.height)
+	keep.setPosition(newPaneSize.x, newPaneSize.y)
+	if newParent.left.id == parent.id {
+	    newParent.left = keep
+	} else {
+	    newParent.right = keep
+	}
+
+	keep.parent = newParent
+	win.activePane = keep
 }
 
 func (win *window)MoveToNextPane(){
@@ -174,6 +198,31 @@ func (win *window)refleshPane(targetPane *pane) {
 	targetPane.reflesh()
 }
 
+func calcMergedPaneSize(target, bro, parent *pane) PaneSize{
+	var size PaneSize
+	if (target.x < bro.x) {
+		size.x = target.x
+	} else {
+		size.x = bro.x
+	}
+
+	if (target.y < bro.y) {
+		size.y = target.y
+	} else {
+		size.y = bro.y
+	}
+
+
+	if (target.x == bro.x) {
+		size.width = target.width
+		size.height = target.height + bro.height + parent.height
+	} else {
+		size.width = target.width + bro.width + parent.width
+		size.height = target.height
+	}
+
+	return size
+}
 
 func findPaneById(targetPane *pane, id int) *pane {
 	if (targetPane.id == id) {

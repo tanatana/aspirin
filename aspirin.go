@@ -60,7 +60,9 @@ func printf_tb(x, y int, fg, bg termbox.Attribute, format string, args ...interf
 
 func (ap *Aspirin)DrawStatus() {
 	drawLine := 0
+
 	var drawPaneTree func(targetPane *pane, floor int)
+
 	drawPaneTree = func (targetPane *pane, floor int) {
 		printf_tb((floor + 1) * 2, drawLine, termbox.ColorWhite, termbox.ColorBlack, "%v", *targetPane)
 		drawLine += 1
@@ -78,6 +80,6 @@ func (ap *Aspirin)DrawStatus() {
 		p := window.GetRootPane()
 		drawPaneTree(p, 1)
 	}
-
 	termbox.Flush()
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 }

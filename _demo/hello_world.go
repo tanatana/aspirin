@@ -52,8 +52,10 @@ loop:
 				// VerticalSplit
 				asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.VirticalSplit)
 			}
-			if ev.Ch == 100 {
-				// close active pane
+			if ev.Ch == 120 {
+				// close pane when press 'x'
+				win := asp.GetActiveWindow()
+				win.ClosePane(win.GetActivePane())
 			}
 			if ev.Ch == 113 {
 				break loop
