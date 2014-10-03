@@ -67,7 +67,6 @@ func (p *pane)reflesh() {
 		for i := p.x; i < (p.x + p.width); i++ {
 			termbox.SetCell(i, p.y, '-', termbox.ColorGreen, termbox.ColorDefault)
 		}
-
 	}
 }
 
