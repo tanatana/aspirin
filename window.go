@@ -49,13 +49,50 @@ func  (win *window)SetSize(width, height int) *window{
 	return win
 }
 
-func (win *window)CloseyPane(paneId int){
+func (win *window)ClosePane(target *pane) {
+	parent := target.parent
+	if (parent.paneType == RootPane) {
+		// TODO: エラーどうしよ
+		panic("can't split")
+	}
+	newParent := parent.parent
+	keep := parent.left
+
+	if keep.id == target.id {
+		 keep = parent.right
+	}
+
+	// merge adjoining pane
+	newPaneSize := calcMergedPaneSize(target, keep, parent)
+	keep.setSize(newPaneSize.width, newPaneSize.height)
+	keep.setPosition(newPaneSize.x, newPaneSize.y)
+	if newParent.left.id == parent.id {
+	    newParent.left = keep
+	} else {
+	    newParent.right = keep
+	}
+
+	keep.parent = newParent
+	win.activePane = keep
 }
 
-func (win *window)MoveToNextPane(){
+func (win *window)MoveToNextPane() *pane{
+	nextPane := findNextPane(win.GetActivePane())
+	if nextPane == nil {
+		nextPane = findFirstPane(win.rootPane)
+	}
+	win.activePane = nextPane
+
+	return win.activePane
 }
 
-func (win *window)MoveToPrevPane(){
+func (win *window)MoveToPrevPane() *pane{
+	prevPane := findPrevPane(win.GetActivePane())
+	if prevPane == nil {
+		prevPane = findLastPane(win.rootPane)
+	}
+	win.activePane = prevPane
+	return win.activePane
 }
 
 func (win *window)MoveToPane(targetId int) {
@@ -71,35 +108,37 @@ func (win *window)SplitPane(targetPane *pane, splitType SplitType) *pane{
 
 	if (splitType == VirticalSplit) {
 		sp = newPane(win.paneCounter, VirticalSplitPane, targetPane.x + targetPane.width/2, targetPane.y, 1, targetPane.height)
-		leftPaneSize.x      = targetPane.x
-		leftPaneSize.y      = targetPane.y
-		leftPaneSize.width  = targetPane.width/2 - 1
-		leftPaneSize.height = targetPane.height
+
+		leftPaneSize.x       = targetPane.x
+		leftPaneSize.y       = targetPane.y
+		leftPaneSize.width   = targetPane.width/2
+		leftPaneSize.height  = targetPane.height
 
 		rightPaneSize.x      = targetPane.x + targetPane.width/2 + 1
 		rightPaneSize.y      = targetPane.y
 		rightPaneSize.width  = targetPane.width/2 - 1
 		rightPaneSize.height = targetPane.height
 
-		if targetPane.width % 2 == 1 {
+		if (targetPane.width % 2 == 1) {
 			rightPaneSize.width += 1
 		}
+
+
 	} else if (splitType == HorizontalSplit) {
 		sp = newPane(win.paneCounter, HorizontalSplitPane, targetPane.x, targetPane.y + targetPane.height/2, targetPane.width, 1)
-		leftPaneSize.x      = targetPane.x
-		leftPaneSize.y      = targetPane.y
-		leftPaneSize.width  = targetPane.width
-		leftPaneSize.height = targetPane.height/2 - 1
+		leftPaneSize.x       = targetPane.x
+		leftPaneSize.y       = targetPane.y
+		leftPaneSize.width   = targetPane.width
+		leftPaneSize.height  = targetPane.height/2
 
 		rightPaneSize.x      = targetPane.x
 		rightPaneSize.y      = targetPane.y + targetPane.height/2 + 1
 		rightPaneSize.width  = targetPane.width
 		rightPaneSize.height = targetPane.height/2 - 1
 
-		if targetPane.height % 2 == 1 {
+		if (targetPane.height % 2 == 1) {
 			rightPaneSize.height += 1
 		}
-
 	}
 	win.activePane   = sp
 	win.paneCounter += 1
@@ -174,8 +213,33 @@ func (win *window)refleshPane(targetPane *pane) {
 	targetPane.reflesh()
 }
 
+func calcMergedPaneSize(target, bro, parent *pane) PaneSize{
+	var size PaneSize
+	if (target.x < bro.x) {
+		size.x = target.x
+	} else {
+		size.x = bro.x
+	}
 
-func findPaneById(targetPane *pane, id int) *pane {
+	if (target.y < bro.y) {
+		size.y = target.y
+	} else {
+		size.y = bro.y
+	}
+
+
+	if (target.x == bro.x) {
+		size.width = target.width
+		size.height = target.height + bro.height + parent.height
+	} else {
+		size.width = target.width + bro.width + parent.width
+		size.height = target.height
+	}
+
+	return size
+}
+
+func findPaneById(targetPane *pane, id int) *pane{
 	if (targetPane.id == id) {
 		return targetPane
 	}
@@ -187,4 +251,69 @@ func findPaneById(targetPane *pane, id int) *pane {
 		return findPaneById(targetPane.right, id)
 	}
 	return nil
+}
+
+func findNextPane(target *pane) *pane{
+	parent := target.parent
+
+	if parent.paneType == RootPane {
+		return nil
+	}
+
+	if parent.left.id == target.id {
+		if parent.right.paneType == VirticalSplitPane ||
+			parent.right.paneType == HorizontalSplitPane {
+			return findPrevPane(parent.right)
+		} else {
+			return parent.right
+		}
+	}
+
+	if parent.right.id == target.id {
+		return findNextPane(parent)
+	}
+	panic("something wrong")
+}
+
+func findPrevPane(target *pane) *pane{
+	parent := target.parent
+
+	if parent.paneType == RootPane {
+		return nil
+	}
+
+	if parent.right.id == target.id {
+		if parent.left.paneType == VirticalSplitPane ||
+			parent.left.paneType == HorizontalSplitPane {
+			return findPrevPane(parent.left)
+		} else {
+			return parent.left
+		}
+	}
+
+	if parent.left.id == target.id {
+		return findPrevPane(parent)
+	}
+	panic("something wrong")
+}
+
+func findFirstPane(target *pane) *pane{
+	if target.left.paneType == VirticalSplitPane ||
+		target.left.paneType == HorizontalSplitPane {
+		return findFirstPane(target.left)
+	}
+	return target.left
+}
+func findLastPane(target *pane) *pane{
+	if target.right != nil {
+		if target.right.paneType == VirticalSplitPane ||
+			target.right.paneType == HorizontalSplitPane {
+			return findLastPane(target.right)
+		}
+		return target.right
+	} else if target.left.paneType == VirticalSplitPane ||
+		target.left.paneType == HorizontalSplitPane {
+		return findLastPane(target.left)
+	}
+	return target.left
 }

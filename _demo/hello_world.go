@@ -40,6 +40,7 @@ func main() {
 
 loop:
 	for {
+		win := asp.GetActiveWindow()
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			printf_tb(0, 20, termbox.ColorDefault, termbox.ColorDefault, "%s", string(ev.Ch))
@@ -52,8 +53,15 @@ loop:
 				// VerticalSplit
 				asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.VirticalSplit)
 			}
-			if ev.Ch == 100 {
-				// close active pane
+			if ev.Ch == 91 {
+				win.MoveToPrevPane()
+			}
+			if ev.Ch == 93 {
+				win.MoveToNextPane()
+			}
+			if ev.Ch == 120 {
+				// close pane when press 'x'
+				win.ClosePane(win.GetActivePane())
 			}
 			if ev.Ch == 113 {
 				break loop
