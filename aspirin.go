@@ -11,7 +11,7 @@ type aspirin struct {
 	windowCounter int
 	width, height int
 	eventChannel chan Event
-	done chan bool
+	quit chan bool
 	onKey func(ev Event)
 }
 
@@ -20,8 +20,7 @@ func (asp *aspirin)OnKey(f func(ev Event)){
 }
 
 func (asp *aspirin)Quit(){
-	termbox.Close()
-	asp.done <- true
+	asp.quit <- true
 }
 
 func setupTermbox(ch chan Event, done chan bool) {
@@ -30,8 +29,6 @@ func setupTermbox(ch chan Event, done chan bool) {
 		fmt.Printf("%v", err)
 		panic(err)
 	}
-	defer termbox.Close()
-
 loop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -44,15 +41,14 @@ loop:
 	}
 
 
-	termbox.Close()
 	done <- true
 }
 
 func NewAspirin() *aspirin{
 	asp := new(aspirin)
 	asp.eventChannel = make(chan Event)
-	asp.done = make(chan bool)
-	go setupTermbox(asp.eventChannel, asp.done)
+	asp.quit = make(chan bool)
+	go setupTermbox(asp.eventChannel, asp.quit)
 
 	for {
 		ev := <- asp.eventChannel
@@ -63,7 +59,8 @@ func NewAspirin() *aspirin{
 		}
 	}
 
-	<- asp.done
+	<- asp.quit
+	termbox.Close()
 	return asp
 }
 
