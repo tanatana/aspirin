@@ -8,5 +8,6 @@ import (
 func main() {
 	asp := aspirin.NewAspirin()
 
+
 	fmt.Printf("%v\n", asp)
 }

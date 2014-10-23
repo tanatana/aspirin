@@ -10,14 +10,11 @@ type aspirin struct {
 	windows []*Window
 	windowCounter int
 	width, height int
-	eventChannel chan termbox.Event
+	eventChannel chan Event
 }
 
-type Event struct{
-	termbox.Event
-}
 
-func initTermbox(ch chan termbox.Event, done chan bool) {
+func setupTermbox(ch chan Event, done chan bool) {
 	err := termbox.Init()
 	if err != nil {
 		fmt.Printf("%v", err)
@@ -29,23 +26,25 @@ loop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
-			ch <- ev
+			ch <- NewEventWithTermboxEvent(ev)
 			if ev.Ch == 113 {
 				fmt.Printf("%v\n", ev)
 				break loop
 			}
 		}
 	}
+
+
 	termbox.Close()
-	close(ch)
 	done <- true
 }
 
 func NewAspirin() *aspirin{
 	asp := new(aspirin)
-	asp.eventChannel = make(chan termbox.Event)
+	asp.eventChannel = make(chan Event)
 	done := make(chan bool)
-	go initTermbox(asp.eventChannel, done)
+	go setupTermbox(asp.eventChannel, done)
+
 	for {
 		ev := <- asp.eventChannel
 		fmt.Printf("%v\n", ev)
@@ -54,6 +53,7 @@ func NewAspirin() *aspirin{
 		}
 
 	}
+
 	<- done
 	return asp
 }
