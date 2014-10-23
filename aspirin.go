@@ -11,8 +11,18 @@ type aspirin struct {
 	windowCounter int
 	width, height int
 	eventChannel chan Event
+	done chan bool
+	onKey func(ev Event)
 }
 
+func (asp *aspirin)OnKey(f func(ev Event)){
+	asp.onKey = f
+}
+
+func (asp *aspirin)Quit(){
+	termbox.Close()
+	asp.done <- true
+}
 
 func setupTermbox(ch chan Event, done chan bool) {
 	err := termbox.Init()
@@ -28,7 +38,6 @@ loop:
 		case termbox.EventKey:
 			ch <- NewEventWithTermboxEvent(ev)
 			if ev.Ch == 113 {
-				fmt.Printf("%v\n", ev)
 				break loop
 			}
 		}
@@ -42,19 +51,19 @@ loop:
 func NewAspirin() *aspirin{
 	asp := new(aspirin)
 	asp.eventChannel = make(chan Event)
-	done := make(chan bool)
-	go setupTermbox(asp.eventChannel, done)
+	asp.done = make(chan bool)
+	go setupTermbox(asp.eventChannel, asp.done)
 
 	for {
 		ev := <- asp.eventChannel
 		fmt.Printf("%v\n", ev)
+		fmt.Printf("%v\n", asp.onKey)
 		if ev.Ch == 113 {
 			break
 		}
-
 	}
 
-	<- done
+	<- asp.done
 	return asp
 }
 
