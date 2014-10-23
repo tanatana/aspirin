@@ -5,81 +5,74 @@ import (
 	"fmt"
 )
 
-type Aspirin struct {
-	activeWindow int
-	windows []*window
+type aspirin struct {
+	activeWindowId int
+	windows []*Window
 	windowCounter int
 	width, height int
-	debug bool
+	eventChannel chan termbox.Event
 }
 
-func NewAspirin(width int, height int) *Aspirin {
-	ap := new(Aspirin)
-	ap.windowCounter = 0
+type Event struct{
+	termbox.Event
+}
+
+func initTermbox(ch chan termbox.Event, done chan bool) {
+	err := termbox.Init()
+	if err != nil {
+		fmt.Printf("%v", err)
+		panic(err)
+	}
+	defer termbox.Close()
+
+loop:
+	for {
+		switch ev := termbox.PollEvent(); ev.Type {
+		case termbox.EventKey:
+			ch <- ev
+			if ev.Ch == 113 {
+				fmt.Printf("%v\n", ev)
+				break loop
+			}
+		}
+	}
+	termbox.Close()
+	close(ch)
+	done <- true
+}
+
+func NewAspirin() *aspirin{
+	asp := new(aspirin)
+	asp.eventChannel = make(chan termbox.Event)
+	done := make(chan bool)
+	go initTermbox(asp.eventChannel, done)
+	for {
+		ev := <- asp.eventChannel
+		fmt.Printf("%v\n", ev)
+		if ev.Ch == 113 {
+			break
+		}
+
+	}
+	<- done
+	return asp
+}
+
+
+func NewAspirinApp() *aspirin{
+	err := termbox.Init()
+	if err != nil {
+		fmt.Printf("%v", err)
+		panic(err)
+	}
+	defer termbox.Close()
+	width, height := termbox.Size()
+
+	ap := new(aspirin)
 	ap.width         = width
 	ap.height        = height
-	ap.CreateWindow("window")
+	ap.windowCounter = 0
+	// ap.CreateWindow("window")
 
 	return ap
-}
-
-func (ap *Aspirin)CreateWindow(title string) *window{
-	w := newWindow(ap.windowCounter, title, ap.width, ap.height)
-	ap.windows = append(ap.windows, w)
-	ap.activeWindow = w.id
-	ap.windowCounter += 1
-	return w
-}
-
-func (ap *Aspirin)GetWindows() []*window{
-	return ap.windows
-}
-
-func (ap *Aspirin)GetActiveWindow() *window{
-	return ap.windows[ap.activeWindow]
-}
-
-func (ap *Aspirin)Reflesh() {
-	win := ap.windows[ap.activeWindow]
-	win.refleshPaneTree(win.GetRootPane())
-	termbox.Flush();
-}
-
-// print aspirin state for debugging
-func print_tb(x, y int, fg, bg termbox.Attribute, msg string) {
-	for _, c := range msg {
-		termbox.SetCell(x, y, c, fg, bg)
-		x++
-	}
-}
-
-func printf_tb(x, y int, fg, bg termbox.Attribute, format string, args ...interface{}) {
-	s := fmt.Sprintf(format, args...)
-	print_tb(x, y, fg, bg, s)
-}
-
-func (ap *Aspirin)DrawStatus() {
-	drawLine := 0
-
-	var drawPaneTree func(targetPane *pane, floor int)
-
-	drawPaneTree = func (targetPane *pane, floor int) {
-		printf_tb((floor + 1) * 2, drawLine, termbox.ColorWhite, termbox.ColorBlack, "%v", *targetPane)
-		drawLine += 1
-		if (targetPane.left != nil){
-			drawPaneTree(targetPane.left, floor + 1)
-		}
-		if (targetPane.right != nil){
-			drawPaneTree(targetPane.right, floor + 1)
-		}
-	}
-
-	for _, window := range ap.GetWindows() {
-		printf_tb(0, drawLine, termbox.ColorWhite, termbox.ColorBlack, "%v", *window)
-		drawLine += 1
-		p := window.GetRootPane()
-		drawPaneTree(p, 1)
-	}
-	termbox.Flush()
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 }
