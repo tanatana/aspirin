@@ -19,48 +19,48 @@ func (asp *aspirin)OnKey(f func(ev Event)){
 	asp.onKey = f
 }
 
+func (asp *aspirin)Run(){
+	fmt.Printf("asp.Run() was called()");
+	go setupEventLoop(asp.eventChannel, asp.quit)
+
+	fmt.Printf("2nd phase in asp.Run()");
+	for {
+		ev := <- asp.eventChannel
+		switch ev.Type {
+		case termbox.EventKey:
+			fmt.Printf("%v\n",ev)
+			asp.onKey(ev)
+		}
+	}
+	fmt.Printf("3rd phase in asp.Run()");
+	<- asp.quit
+}
+
 func (asp *aspirin)Quit(){
+	termbox.Close()
 	asp.quit <- true
 }
 
-func setupTermbox(ch chan Event, done chan bool) {
-	err := termbox.Init()
-	if err != nil {
-		fmt.Printf("%v", err)
-		panic(err)
-	}
-loop:
+func setupEventLoop(ch chan Event, quit chan bool) {
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			ch <- NewEventWithTermboxEvent(ev)
-			if ev.Ch == 113 {
-				break loop
-			}
 		}
 	}
-
-
-	done <- true
 }
 
 func NewAspirin() *aspirin{
 	asp := new(aspirin)
 	asp.eventChannel = make(chan Event)
 	asp.quit = make(chan bool)
-	go setupTermbox(asp.eventChannel, asp.quit)
 
-	for {
-		ev := <- asp.eventChannel
-		fmt.Printf("%v\n", ev)
-		fmt.Printf("%v\n", asp.onKey)
-		if ev.Ch == 113 {
-			break
-		}
+	err := termbox.Init()
+	if err != nil {
+		fmt.Printf("%v", err)
+		panic(err)
 	}
 
-	<- asp.quit
-	termbox.Close()
 	return asp
 }
 

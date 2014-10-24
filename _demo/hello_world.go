@@ -14,5 +14,7 @@ func main() {
 		}
 	})
 
+	asp.Run()
+
 	fmt.Printf("%v\n", asp)
 }
