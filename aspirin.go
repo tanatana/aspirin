@@ -6,8 +6,8 @@ import (
 )
 
 type aspirin struct {
-	activeWindowId int
-	windows []*Window
+	activeWindow *window
+	windows []*window
 	windowCounter int
 	width, height int
 	onKey func(ev Event)
@@ -18,11 +18,27 @@ func (asp *aspirin)OnKey(f func(ev Event)){
 	asp.onKey = f
 }
 
-func (asp *aspirin)Run(){
-	fmt.Printf("asp.Run() was called()");
-	go setupEventLoop(asp.EventChannel)
+func (asp *aspirin)AddWindow(w *window, changeActiveWindow bool) {
+	w.id = asp.windowCounter
+	if w.title == "" {
+		w.title = fmt.Sprintf("window %v", w.id)
+	}
 
-	fmt.Printf("2nd phase in asp.Run()");
+	asp.windows = append(asp.windows, w)
+	if (changeActiveWindow) {
+		asp.activeWindow = w
+	}
+	asp.windowCounter += 1
+}
+
+func (asp *aspirin)GetActiveWindow() *window{
+	return asp.activeWindow
+}
+
+
+func (asp *aspirin)Run(){
+
+	go setupEventLoop(asp.EventChannel)
 
 loop:
 	for {
@@ -32,9 +48,10 @@ loop:
 		case termbox.EventKey:
 			go asp.onKey(ev)
 		case EventQuit:
-			fmt.Printf("EventQuit was handled");
+			fmt.Printf("EventQuit was handled\n");
 			break loop
 		}
+		asp.activeWindow.eventChannel <- ev
 	}
 }
 
@@ -55,6 +72,7 @@ func setupEventLoop(ec chan Event) {
 func NewAspirin() *aspirin{
 	asp := new(aspirin)
 	asp.EventChannel = make(chan Event)
+	asp.onKey = (func(ev Event){})
 
 	err := termbox.Init()
 	if err != nil {
