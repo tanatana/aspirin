@@ -23,13 +23,14 @@ func (asp *aspirin)Run(){
 	go setupEventLoop(asp.EventChannel)
 
 	fmt.Printf("2nd phase in asp.Run()");
+
 loop:
 	for {
 		ev := <- asp.EventChannel
 		fmt.Printf("%v\n", ev)
 		switch ev.Type {
 		case termbox.EventKey:
-			asp.onKey(ev)
+			go asp.onKey(ev)
 		case EventQuit:
 			fmt.Printf("EventQuit was handled");
 			termbox.Close()
@@ -46,17 +47,10 @@ func (asp *aspirin)Quit(){
 	asp.EventChannel <- e
 }
 
-func setupEventLoop(ch chan Event) {
+func setupEventLoop(ec chan Event) {
 	for {
 		ev := termbox.PollEvent()
-		if ev.Ch == 113 {
-			var e Event
-			e.Type = EventQuit
-			ch <- e
-		} else {
-			ch <- NewEventWithTermboxEvent(ev)
-		}
-
+		ec <- NewEventWithTermboxEvent(ev)
 	}
 }
 
