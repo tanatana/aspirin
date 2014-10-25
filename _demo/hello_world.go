@@ -21,7 +21,7 @@ func main() {
 
 	asp.Run()
 	fmt.Printf("%v\n", asp)
-	fmt.Printf("%v\n", asp.GetActiveWindow())
-	fmt.Printf("%v\n", asp.GetActiveWindow().GetRootPane())
+	fmt.Printf("%v\n", asp.ActiveWindow())
+	fmt.Printf("%v\n", asp.ActiveWindow().GetRootPane())
 
 }

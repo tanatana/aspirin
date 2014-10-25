@@ -31,7 +31,7 @@ func (asp *aspirin)AddWindow(w *window, changeActiveWindow bool) {
 	asp.windowCounter += 1
 }
 
-func (asp *aspirin)GetActiveWindow() *window{
+func (asp *aspirin)ActiveWindow() *window{
 	return asp.activeWindow
 }
 
