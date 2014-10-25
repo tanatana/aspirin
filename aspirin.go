@@ -33,15 +33,13 @@ loop:
 			go asp.onKey(ev)
 		case EventQuit:
 			fmt.Printf("EventQuit was handled");
-			termbox.Close()
 			break loop
-		case EventNone:
-			fmt.Printf("EventNone was handled");
 		}
 	}
 }
 
 func (asp *aspirin)Quit(){
+	termbox.Close()
 	var e Event
 	e.Type = EventQuit
 	asp.EventChannel <- e
