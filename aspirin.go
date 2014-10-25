@@ -10,9 +10,8 @@ type aspirin struct {
 	windows []*Window
 	windowCounter int
 	width, height int
-	eventChannel chan Event
-	quit chan bool
 	onKey func(ev Event)
+	EventChannel chan Event
 }
 
 func (asp *aspirin)OnKey(f func(ev Event)){
@@ -21,39 +20,49 @@ func (asp *aspirin)OnKey(f func(ev Event)){
 
 func (asp *aspirin)Run(){
 	fmt.Printf("asp.Run() was called()");
-	go setupEventLoop(asp.eventChannel, asp.quit)
+	go setupEventLoop(asp.EventChannel)
 
 	fmt.Printf("2nd phase in asp.Run()");
+loop:
 	for {
-		ev := <- asp.eventChannel
+		ev := <- asp.EventChannel
+		fmt.Printf("%v\n", ev)
 		switch ev.Type {
 		case termbox.EventKey:
-			fmt.Printf("%v\n",ev)
 			asp.onKey(ev)
+		case EventQuit:
+			fmt.Printf("EventQuit was handled");
+			termbox.Close()
+			break loop
+		case EventNone:
+			fmt.Printf("EventNone was handled");
 		}
 	}
-	fmt.Printf("3rd phase in asp.Run()");
-	<- asp.quit
 }
 
 func (asp *aspirin)Quit(){
-	termbox.Close()
-	asp.quit <- true
+	var e Event
+	e.Type = EventQuit
+	asp.EventChannel <- e
 }
 
-func setupEventLoop(ch chan Event, quit chan bool) {
+func setupEventLoop(ch chan Event) {
 	for {
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
+		ev := termbox.PollEvent()
+		if ev.Ch == 113 {
+			var e Event
+			e.Type = EventQuit
+			ch <- e
+		} else {
 			ch <- NewEventWithTermboxEvent(ev)
 		}
+
 	}
 }
 
 func NewAspirin() *aspirin{
 	asp := new(aspirin)
-	asp.eventChannel = make(chan Event)
-	asp.quit = make(chan bool)
+	asp.EventChannel = make(chan Event)
 
 	err := termbox.Init()
 	if err != nil {

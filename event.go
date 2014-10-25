@@ -4,6 +4,12 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+// Event type. See Event.Type field.
+const (
+	EventQuit termbox.EventType = 100
+	EventNone termbox.EventType = 199
+)
+
 type Event struct{
 	termbox.Event
 }

@@ -13,8 +13,6 @@ func main() {
 			asp.Quit()
 		}
 	})
-
+	fmt.Printf("RUN\n")
 	asp.Run()
-
-	fmt.Printf("%v\n", asp)
 }
