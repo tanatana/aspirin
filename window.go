@@ -16,16 +16,12 @@ type window struct {
 }
 
 func (w *window)setupEventLoop() {
-loop:
 	for {
 		ev := <- w.eventChannel
 		fmt.Printf("%v\n", ev)
 		switch ev.Type {
 		case termbox.EventKey:
 			go w.onKey(ev)
-		case EventQuit:
-			fmt.Printf("EventQuit was handled\n");
-			break loop
 		}
 		w.activePane.getEventChannel() <- ev
 	}

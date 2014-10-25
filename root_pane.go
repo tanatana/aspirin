@@ -17,11 +17,11 @@ func newRootPane() Pane{
 }
 
 func (rp *RootPane)viewDidLoad() {
-	fmt.Printf("viewDidLoad from %s\n", "RootPane")
+	fmt.Printf("viewDidLoad@%s\n", "RootPane")
 }
 
 func (rp *RootPane)onKey() {
-	fmt.Printf("onKey from %s\n", "RootPane")
+	fmt.Printf("onKey@%s\n", "RootPane")
 }
 
 func (rp *RootPane)getEventChannel() chan Event{

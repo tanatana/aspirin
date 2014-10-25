@@ -21,11 +21,11 @@ type BasePane struct{
 }
 
 func (bp *BasePane)viewDidLoad() {
-	fmt.Printf("viewDidLoad from %s\n", "BasePane")
+	fmt.Printf("viewDidLoad@%s\n", "BasePane")
 }
 
 func (bp *BasePane)onKey(ev Event) {
-	fmt.Printf("onKey from %s\n", "BasePane")
+	fmt.Printf("onKey@%s\n", "BasePane")
 }
 
 func (bp *BasePane)getEventChannel() chan Event{
@@ -33,17 +33,12 @@ func (bp *BasePane)getEventChannel() chan Event{
 }
 
 func (bp *BasePane)setupEventLoop() {
-	loop:
-
 	for {
 		ev := <- bp.EventChannel
 		fmt.Printf("%v\n", ev)
 		switch ev.Type {
 		case termbox.EventKey:
 			go bp.onKey(ev)
-		case EventQuit:
-			fmt.Printf("EventQuit was handled\n");
-			break loop
 		}
 	}
 }
