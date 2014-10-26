@@ -10,7 +10,7 @@ type RootPane struct {
 
 func newRootPane() Pane{
 	rp := new(RootPane)
-	rp.EventChannel = make(chan Event)
+	rp.eventChannel = make(chan Event)
 	go rp.setupEventLoop()
 
 	return rp
@@ -22,8 +22,4 @@ func (rp *RootPane)viewDidLoad() {
 
 func (rp *RootPane)onKey() {
 	fmt.Printf("onKey@%s\n", "RootPane")
-}
-
-func (rp *RootPane)getEventChannel() chan Event{
-	return rp.EventChannel
 }

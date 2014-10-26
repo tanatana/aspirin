@@ -23,7 +23,7 @@ func (w *window)setupEventLoop() {
 		case termbox.EventKey:
 			go w.onKey(ev)
 		}
-		w.activePane.getEventChannel() <- ev
+		w.activePane.EventChannel() <- ev
 	}
 }
 
@@ -44,12 +44,12 @@ func NewWindow(title string) *window{
 	return w
 }
 
-func (w *window)GetRootPane() Pane{
+func (w *window)RootPane() Pane{
 
 	return w.rootPane
 }
 
-func (w *window)GetActivePane() Pane{
+func (w *window)ActivePane() Pane{
 
 	return w.activePane
 }

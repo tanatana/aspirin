@@ -9,7 +9,7 @@ import (
 type Pane interface {
 	viewDidLoad()
 	onKey()
-	getEventChannel() chan Event
+	EventChannel() chan Event
 	setupEventLoop()
 }
 
@@ -17,7 +17,7 @@ type BasePane struct{
 	id int
 	parent Pane
 	left, right Pane
-	EventChannel chan Event
+	eventChannel chan Event
 }
 
 func (bp *BasePane)viewDidLoad() {
@@ -28,13 +28,13 @@ func (bp *BasePane)onKey(ev Event) {
 	fmt.Printf("onKey@%s\n", "BasePane")
 }
 
-func (bp *BasePane)getEventChannel() chan Event{
-	return bp.EventChannel
+func (bp *BasePane)EventChannel() chan Event{
+	return bp.eventChannel
 }
 
 func (bp *BasePane)setupEventLoop() {
 	for {
-		ev := <- bp.EventChannel
+		ev := <- bp.eventChannel
 		fmt.Printf("%v\n", ev)
 		switch ev.Type {
 		case termbox.EventKey:
