@@ -19,22 +19,25 @@ type Pane interface {
 	setParent(Pane) Pane
 }
 
+type PaneSize struct {
+	x, y, width, height int
+}
+
+type SplitType int
+const (
+	VirticalSplit SplitType = iota
+	HorizontalSplit
+)
+
+
 type BasePane struct{
 	id int
-	x, y int
-	width, height int
+	size PaneSize
 	parent Pane
 	left, right Pane
 	onKey func(ev Event)
 	eventChannel chan Event
 }
-
-type SplitType int
-
-const (
-	VirticalSplit SplitType = iota
-	HorizontalSplit
-)
 
 func (bp *BasePane)Init() {
 	bp.onKey = (func(ev Event) {
@@ -46,10 +49,10 @@ func (bp *BasePane)Init() {
 }
 
 func (bp *BasePane)SetSize(x, y, width, height int){
-	bp.x = x
-	bp.y = y
-	bp.width = width
-	bp.height = height
+	bp.size.x = x
+	bp.size.y = y
+	bp.size.width = width
+	bp.size.height = height
 }
 
 
