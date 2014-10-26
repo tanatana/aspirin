@@ -18,11 +18,18 @@ func main() {
 	w.SetInitialPane(p, true)
 	asp.AddWindow(w, true)
 
-
 	asp.OnKey(func(ev aspirin.Event){
 		if ev.Ch == 113 {
 			asp.Quit()
 		}
+		if ev.Ch == 115 {
+			asp.DebugPrint("split")
+
+			tmpPane := new(aspirin.BasePane)
+			tmpPane.Init()
+			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), tmpPane, 0)
+		}
+
 	})
 
 	asp.Run()

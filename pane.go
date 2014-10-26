@@ -11,14 +11,18 @@ type Pane interface {
 	setupEventLoop()
 	EventChannel() chan Event
 	SetSize(int, int, int, int)
+	Id() int
+	setId(int)
 	Left() Pane
 	setLeft(Pane) Pane
 	Right() Pane
 	setRight(Pane) Pane
 	Parent() Pane
+	Size() PaneSize
 	setParent(Pane) Pane
 }
 
+// bbox: boundingboxとかにした方がよさそう，size，幅と高さだけっぽい
 type PaneSize struct {
 	x, y, width, height int
 }
@@ -60,6 +64,12 @@ func (bp *BasePane)viewDidLoad() {
 	fmt.Printf("viewDidLoad@%s\n", "BasePane")
 }
 
+func (bp *BasePane)Id() int{
+	return bp.id
+}
+func (bp *BasePane)setId(id int){
+	bp.id = id
+}
 func (bp *BasePane)Left() Pane{
 	return bp.left
 }
@@ -80,6 +90,9 @@ func (bp *BasePane)Parent() Pane{
 func (bp *BasePane)setParent(p Pane) Pane{
 	bp.parent = p
 	return bp.parent
+}
+func (bp *BasePane)Size() PaneSize{
+	return bp.size
 }
 
 func (bp *BasePane)OnKey(f func(ev Event)){
