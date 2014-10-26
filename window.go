@@ -36,7 +36,9 @@ func NewWindow(title string, width, height int) *window{
 	w.eventChannel = make(chan Event)
 	w.onKey = (func(e Event){})
 
-	p := newRootPane(0, 0, width, height)
+	p := new(RootPane)
+	p.Init()
+	p.SetSize(0, 0, width, height)
 	w.rootPane = p
 	w.activePane = p
 
@@ -46,15 +48,34 @@ func NewWindow(title string, width, height int) *window{
 }
 
 func (w *window)RootPane() Pane{
-
 	return w.rootPane
 }
 
 func (w *window)ActivePane() Pane{
-
 	return w.activePane
+}
+
+func (w *window)Width() int{
+	return w.width
+}
+
+func (w *window)Height() int{
+	return w.height
 }
 
 func (w *window)MoveToNextPane() {}
 func (w *window)MoveToPrevPane() {}
 func (w *window)MoveToPane() {}
+
+func (w *window)SetLeftToThePane(parent, child Pane) {
+
+}
+
+func (w *window)SetInitialPane(child Pane, changeActivePane bool) {
+	child.setParent(w.rootPane)
+	w.rootPane.setLeft(child)
+
+	if (changeActivePane) {
+		w.activePane = child
+	}
+}
