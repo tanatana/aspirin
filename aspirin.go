@@ -37,7 +37,6 @@ func (asp *aspirin)ActiveWindow() *window{
 
 
 func (asp *aspirin)Run(){
-
 	go setupEventLoop(asp.EventChannel)
 
 loop:
@@ -69,6 +68,15 @@ func setupEventLoop(ec chan Event) {
 	}
 }
 
+func (asp *aspirin)Width() int{
+	return asp.width
+}
+
+func (asp *aspirin)Height() int{
+	return asp.height
+}
+
+
 func NewAspirin() *aspirin{
 	asp := new(aspirin)
 	asp.EventChannel = make(chan Event)
@@ -79,6 +87,8 @@ func NewAspirin() *aspirin{
 		fmt.Printf("%v", err)
 		panic(err)
 	}
+
+	asp.width, asp.height = termbox.Size()
 
 	return asp
 }

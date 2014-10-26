@@ -8,10 +8,15 @@ type RootPane struct {
 	BasePane
 }
 
-func newRootPane() Pane{
+func newRootPane(x, y, width, height int) Pane{
 	rp := new(RootPane)
 	rp.eventChannel = make(chan Event)
 	go rp.setupEventLoop()
+
+	rp.x = x
+	rp.y = y
+	rp.width = width
+	rp.height = height
 
 	return rp
 }

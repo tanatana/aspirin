@@ -8,10 +8,8 @@ import (
 func main() {
 	asp := aspirin.NewAspirin()
 
-	w := aspirin.NewWindow("")
+	w := aspirin.NewWindow("", asp.Width(), asp.Height())
 	asp.AddWindow(w, true)
-
-
 
 	asp.OnKey(func(ev aspirin.Event){
 		if ev.Ch == 113 {
@@ -23,5 +21,4 @@ func main() {
 	fmt.Printf("%v\n", asp)
 	fmt.Printf("%v\n", asp.ActiveWindow())
 	fmt.Printf("%v\n", asp.ActiveWindow().RootPane())
-
 }

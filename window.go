@@ -27,15 +27,16 @@ func (w *window)setupEventLoop() {
 	}
 }
 
-func NewWindow(title string) *window{
-	// TODO: create mini-pane like emacs's mini-buffer
+func NewWindow(title string, width, height int) *window{
 	w             := new(window)
 	w.title        = title
-	w.eventChannel = make(chan Event)
+	w.width        = width
+	w.height       = height
 
+	w.eventChannel = make(chan Event)
 	w.onKey = (func(e Event){})
 
-	p := newRootPane()
+	p := newRootPane(0, 0, width, height)
 	w.rootPane = p
 	w.activePane = p
 
@@ -53,3 +54,7 @@ func (w *window)ActivePane() Pane{
 
 	return w.activePane
 }
+
+func (w *window)MoveToNextPane() {}
+func (w *window)MoveToPrevPane() {}
+func (w *window)MoveToPane() {}
