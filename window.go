@@ -67,14 +67,9 @@ func (w *window)MoveToNextPane() {}
 func (w *window)MoveToPrevPane() {}
 func (w *window)MoveToPane() {}
 
-func (w *window)SetLeftToThePane(parent, child Pane) {
-
-}
-
 func (w *window)SetInitialPane(child Pane, changeActivePane bool) {
 	child.setParent(w.rootPane)
 	w.rootPane.setLeft(child)
-
 	if (changeActivePane) {
 		w.activePane = child
 	}

@@ -11,6 +11,9 @@ func main() {
 	w := aspirin.NewWindow("", asp.Width(), asp.Height())
 	p := new(MainPane)
 	p.Init()
+	p.OnKey(func(ev aspirin.Event) {
+		fmt.Printf("onKey@%s\n", "MainPane")
+	})
 	p.SetSize(0, 0, w.Width(), w.Height())
 	w.SetInitialPane(p, true)
 	asp.AddWindow(w, true)

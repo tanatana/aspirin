@@ -7,7 +7,7 @@ import (
 
 type Pane interface {
 	viewDidLoad()
-	onKey(ev Event)
+	OnKey(func(ev Event))
 	setupEventLoop()
 	EventChannel() chan Event
 	SetSize(int, int, int, int)
@@ -17,8 +17,6 @@ type Pane interface {
 	setRight(Pane) Pane
 	Parent() Pane
 	setParent(Pane) Pane
-	Split(SplitType)
-	Close()
 }
 
 type BasePane struct{
@@ -27,6 +25,7 @@ type BasePane struct{
 	width, height int
 	parent Pane
 	left, right Pane
+	onKey func(ev Event)
 	eventChannel chan Event
 }
 
@@ -38,6 +37,10 @@ const (
 )
 
 func (bp *BasePane)Init() {
+	bp.onKey = (func(ev Event) {
+		fmt.Printf("onKey@%s\n", "BasePane")
+	})
+
 	bp.eventChannel = make(chan Event)
 	go bp.setupEventLoop()
 }
@@ -52,10 +55,6 @@ func (bp *BasePane)SetSize(x, y, width, height int){
 
 func (bp *BasePane)viewDidLoad() {
 	fmt.Printf("viewDidLoad@%s\n", "BasePane")
-}
-
-func (bp *BasePane)onKey(ev Event) {
-	fmt.Printf("onKey@%s\n", "BasePane")
 }
 
 func (bp *BasePane)Left() Pane{
@@ -80,9 +79,9 @@ func (bp *BasePane)setParent(p Pane) Pane{
 	return bp.parent
 }
 
-func (bp *BasePane)Split(t SplitType) {}
-
-func (bp *BasePane)Close() {}
+func (bp *BasePane)OnKey(f func(ev Event)){
+	bp.onKey = f
+}
 
 func (bp *BasePane)EventChannel() chan Event{
 	return bp.eventChannel
