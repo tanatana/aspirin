@@ -39,9 +39,11 @@ func NewWindow(title string, width, height int) *window{
 
 	p := new(RootPane)
 	p.Init()
+	p.setId(w.paneCounter)
 	p.SetSize(0, 0, width, height)
 	w.rootPane = p
 	w.activePane = p
+	w.paneCounter += 1
 
 	go w.setupEventLoop()
 
@@ -96,6 +98,8 @@ func (win *window)SplitPane(targetPane, newPane Pane, splitType SplitType) Pane{
 
 	// } else if (splitType == HorizontalSplit) {
 	sp = new(SplitPane)
+	sp.setId(win.paneCounter)
+	sp.SetSize(targetPane.Size().x, targetPane.Size().y + targetPane.Size().height/2, targetPane.Size().width, 1)
 
 	leftPaneSize.x       = targetPane.Size().x
 	leftPaneSize.y       = targetPane.Size().y
@@ -137,9 +141,11 @@ func (win *window)SplitPane(targetPane, newPane Pane, splitType SplitType) Pane{
 }
 
 func (w *window)SetInitialPane(child Pane, changeActivePane bool) {
+	child.setId(w.paneCounter)
 	child.setParent(w.rootPane)
 	w.rootPane.setLeft(child)
 	if (changeActivePane) {
 		w.activePane = child
 	}
+	w.paneCounter += 1
 }
