@@ -82,14 +82,22 @@ func (bp *BasePane)SetSize(x, y, width, height int){
 }
 
 func (bp *BasePane)Update(x, y int, lo LineObject) {
-	Printf_tb(x, y, termbox.ColorDefault, termbox.ColorDefault, lo.Text())
+	fgColor := termbox.ColorDefault
+	bgColor := termbox.ColorDefault
+
+	if (lo == bp.activeLineObject) {
+		fgColor = termbox.ColorWhite
+		bgColor = termbox.ColorGreen
+	}
+
+	Printf_tb(x, y, fgColor, bgColor, lo.Text())
 
 	if (lo.Next() != nil) {
 		bp.Update(x, y + 1, lo.Next())
 	} else {
-		return
+		Printf_tb(70, y, fgColor, bgColor, "%d", x)
+		Flush()
 	}
-	Flush()
 }
 
 func (bp *BasePane)viewDidLoad() {
