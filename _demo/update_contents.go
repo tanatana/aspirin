@@ -2,7 +2,6 @@ package main
 
 import (
 	"../../aspirin"
-	"github.com/nsf/termbox-go"
 	"fmt"
 )
 
@@ -12,11 +11,18 @@ func main() {
 	w := aspirin.NewWindow("", asp.Width(), asp.Height())
 	p := new(MainPane)
 	p.Init()
-	p.OnKey(func(ev aspirin.Event) {
-
-		aspirin.Printf_tb(0, 0, termbox.ColorDefault, termbox.ColorDefault, "onKey@%s\n", "MainPane")
-		termbox.Flush()
+	p.OnKey(func(ev aspirin.Event){
+		// aspirin.Printf_tb(0, 0, termbox.ColorDefault, termbox.ColorDefault, "onKey@%s\n", "MainPane")
+		// termbox.Flush()
+		tlo := new(aspirin.TextLineObject)
+		tlo.SetText(fmt.Sprintf("%v", ev))
+		p.AddLineObject(tlo)
 	})
+
+
+	// p.contents := [] aspirin.LineObject
+	// p.SetContents(contents)
+
 	p.SetSize(0, 0, w.Width(), w.Height())
 	w.SetInitialPane(p, true)
 	asp.AddWindow(w, true)

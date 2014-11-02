@@ -128,3 +128,7 @@ func Printf_tb(x, y int, fg, bg termbox.Attribute, format string, args ...interf
 	s := fmt.Sprintf(format, args...)
 	Print_tb(x, y, fg, bg, s)
 }
+
+func Flush() {
+	termbox.Flush()
+}

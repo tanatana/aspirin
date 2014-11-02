@@ -15,6 +15,8 @@ type Pane interface {
 
 	EventChannel() chan Event
 
+	Update(x, y int, lo LineObject)
+
 	SetSize(int, int, int, int)
 	Id() int
 	setId(int)
@@ -25,6 +27,8 @@ type Pane interface {
 	Parent() Pane
 	Size() PaneSize
 	setParent(Pane) Pane
+
+	AddLineObject(LineObject)
 }
 
 // bbox: boundingboxとかにした方がよさそう，size，幅と高さだけっぽい
@@ -45,6 +49,9 @@ type BasePane struct{
 	parent Pane
 	left, right Pane
 
+	rootLineObject LineObject
+	activeLineObject LineObject
+
 	onKey func(ev Event)
 	onMouse func(ev Event)
 	onResize func(ev Event)
@@ -59,6 +66,9 @@ func (bp *BasePane)Init() {
 	bp.onMouse = (func(ev Event){})
 	bp.onError = (func(ev Event){})
 
+	rootLineObj := newRootLineObject()
+	bp.rootLineObject = rootLineObj
+	bp.activeLineObject = rootLineObj
 
 	bp.eventChannel = make(chan Event)
 	go bp.setupEventLoop()
@@ -71,8 +81,20 @@ func (bp *BasePane)SetSize(x, y, width, height int){
 	bp.size.height = height
 }
 
+func (bp *BasePane)Update(x, y int, lo LineObject) {
+	Printf_tb(x, y, termbox.ColorDefault, termbox.ColorDefault, lo.Text())
+
+	if (lo.Next() != nil) {
+		bp.Update(x, y + 1, lo.Next())
+	} else {
+		return
+	}
+	Flush()
+}
 
 func (bp *BasePane)viewDidLoad() {
+
+
 }
 
 func (bp *BasePane)Id() int{
@@ -104,6 +126,14 @@ func (bp *BasePane)setParent(p Pane) Pane{
 }
 func (bp *BasePane)Size() PaneSize{
 	return bp.size
+}
+
+func (bp *BasePane)AddLineObject(lo LineObject) {
+	bp.activeLineObject.SetNext(lo)
+	lo.SetPrev(bp.activeLineObject)
+	bp.activeLineObject = lo
+
+	bp.Update(0, 0, bp.rootLineObject)
 }
 
 func (bp *BasePane)OnKey(f func(ev Event)){
