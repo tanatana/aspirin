@@ -42,12 +42,12 @@ func (asp *aspirin)Run(){
 loop:
 	for {
 		ev := <- asp.EventChannel
-		fmt.Printf("%v\n", ev)
+		// fmt.Printf("%v\n", ev)
 		switch ev.Type {
 		case termbox.EventKey:
 			go asp.onKey(ev)
 		case EventQuit:
-			fmt.Printf("EventQuit was handled\n");
+			// fmt.Printf("EventQuit was handled\n");
 			break loop
 		}
 		asp.activeWindow.eventChannel <- ev
@@ -62,7 +62,7 @@ func (asp *aspirin)Quit(){
 }
 
 func (asp *aspirin)DebugPrint(message string){
-	fmt.Printf("%s\n",message)
+	// fmt.Printf("%s\n",message)
 }
 
 func setupEventLoop(ec chan Event) {
@@ -114,4 +114,17 @@ func NewAspirinApp() *aspirin{
 	// ap.CreateWindow("window")
 
 	return ap
+}
+
+// print aspirin state for debugging
+func Print_tb(x, y int, fg, bg termbox.Attribute, msg string) {
+	for _, c := range msg {
+		termbox.SetCell(x, y, c, fg, bg)
+		x++
+	}
+}
+
+func Printf_tb(x, y int, fg, bg termbox.Attribute, format string, args ...interface{}) {
+	s := fmt.Sprintf(format, args...)
+	Print_tb(x, y, fg, bg, s)
 }

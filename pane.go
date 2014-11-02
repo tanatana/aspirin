@@ -1,15 +1,20 @@
 package aspirin
 
 import (
-	"fmt"
 	"github.com/nsf/termbox-go"
 )
 
 type Pane interface {
 	viewDidLoad()
-	OnKey(func(ev Event))
 	setupEventLoop()
+
+	OnKey(func(ev Event))
+	OnResize(func(ev Event))
+	OnMouse(func(ev Event))
+	OnError(func(ev Event))
+
 	EventChannel() chan Event
+
 	SetSize(int, int, int, int)
 	Id() int
 	setId(int)
@@ -39,14 +44,21 @@ type BasePane struct{
 	size PaneSize
 	parent Pane
 	left, right Pane
+
 	onKey func(ev Event)
+	onMouse func(ev Event)
+	onResize func(ev Event)
+	onError func(ev Event)
 	eventChannel chan Event
 }
 
 func (bp *BasePane)Init() {
-	bp.onKey = (func(ev Event) {
-		fmt.Printf("onKey@%s\n", "BasePane")
-	})
+	// By default, no behavior are defined
+	bp.onKey = (func(ev Event){})
+	bp.onResize = (func(ev Event){})
+	bp.onMouse = (func(ev Event){})
+	bp.onError = (func(ev Event){})
+
 
 	bp.eventChannel = make(chan Event)
 	go bp.setupEventLoop()
@@ -61,7 +73,6 @@ func (bp *BasePane)SetSize(x, y, width, height int){
 
 
 func (bp *BasePane)viewDidLoad() {
-	fmt.Printf("viewDidLoad@%s\n", "BasePane")
 }
 
 func (bp *BasePane)Id() int{
@@ -98,6 +109,15 @@ func (bp *BasePane)Size() PaneSize{
 func (bp *BasePane)OnKey(f func(ev Event)){
 	bp.onKey = f
 }
+func (bp *BasePane)OnMouse(f func(ev Event)){
+	bp.onMouse = f
+}
+func (bp *BasePane)OnResize(f func(ev Event)){
+	bp.onResize = f
+}
+func (bp *BasePane)OnError(f func(ev Event)){
+	bp.onError = f
+}
 
 func (bp *BasePane)EventChannel() chan Event{
 	return bp.eventChannel
@@ -106,7 +126,6 @@ func (bp *BasePane)EventChannel() chan Event{
 func (bp *BasePane)setupEventLoop() {
 	for {
 		ev := <- bp.eventChannel
-		fmt.Printf("%v\n", ev)
 		switch ev.Type {
 		case termbox.EventKey:
 			go bp.onKey(ev)

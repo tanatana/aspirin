@@ -1,7 +1,6 @@
 package aspirin
 
 import (
-	"fmt"
 	"github.com/nsf/termbox-go"
 )
 
@@ -19,7 +18,6 @@ type window struct {
 func (w *window)setupEventLoop() {
 	for {
 		ev := <- w.eventChannel
-		fmt.Printf("%v\n", ev)
 		switch ev.Type {
 		case termbox.EventKey:
 			go w.onKey(ev)
