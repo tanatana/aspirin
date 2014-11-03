@@ -29,11 +29,11 @@ type Pane interface {
 	Size() PaneSize
 	setParent(Pane) Pane
 
-	AddLine(Line)
+	AddLine(l Line, setActive bool)
 	ActiveLine() Line
 	setActiveLine(Line)
-	MoveNextObject()
-	MovePrevObject()
+	MoveNextElement()
+	MovePrevElement()
 }
 
 // bbox: boundingboxとかにした方がよさそう，size，幅と高さだけっぽい
@@ -146,12 +146,21 @@ func (bp *BasePane)Size() PaneSize{
 	return bp.size
 }
 
-func (bp *BasePane)AddLine(lo Line) {
-	bp.activeLine.SetNext(lo)
-	lo.SetPrev(bp.activeLine)
-	bp.activeLine = lo
+func (bp *BasePane)AddLine(lo Line, setActive bool) {
+	ll := bp.findLastLine(bp.rootLine)
+	ll.SetNext(lo)
+	lo.SetPrev(ll)
+	if setActive {
+	  bp.activeLine = lo
+	}
 
 	bp.Update()
+
+	// bp.activeLine.SetNext(lo)
+	// lo.SetPrev(bp.activeLine)
+	// bp.activeLine = lo
+
+	// bp.Update()
 }
 
 func (bp *BasePane)ActiveLine() Line{
@@ -160,15 +169,27 @@ func (bp *BasePane)ActiveLine() Line{
 func (bp *BasePane)setActiveLine(lo Line){
 	bp.activeLine = lo
 }
-func (bp *BasePane)MoveNextObject(){
+func (bp *BasePane)MoveNextElement(){
 	alo := bp.activeLine
 	nlo := alo.Next()
 	bp.activeLine = nlo
+	bp.Update()
 }
-func (bp *BasePane)MovePrevObject(){
+func (bp *BasePane)MovePrevElement(){
 	alo := bp.activeLine
 	plo := alo.Prev()
 	bp.activeLine = plo
+	bp.Update()
+}
+
+func (bp *BasePane)findLastLine(l Line) Line{
+	var lastLine Line
+	if l.Next() != nil {
+		lastLine = bp.findLastLine(l.Next())
+	} else {
+		lastLine = l
+	}
+	return lastLine
 }
 
 

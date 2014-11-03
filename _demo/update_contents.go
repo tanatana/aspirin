@@ -16,16 +16,20 @@ func main() {
 		// termbox.Flush()
 		if ev.Ch == 0 {
 			p.ActiveLine().RunAction(ev)
+		} else if ev.Ch == 106 {
+			p.MoveNextElement()
+		} else if ev.Ch == 107 {
+			p.MovePrevElement()
 		} else {
 			lo := new(aspirin.LineBase)
 			lo.SetText(fmt.Sprintf("%v", lo))
 
 			lo.SetAction(func(e aspirin.Event){
 				loFromAction := aspirin.NewTextLine(fmt.Sprintf("%v from action", ev))
-				p.AddLine(loFromAction)
+				p.AddLine(loFromAction, false)
 			})
 
-			p.AddLine(lo)
+			p.AddLine(lo, false)
 		}
 
 	})
