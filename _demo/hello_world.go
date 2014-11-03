@@ -30,10 +30,6 @@ func main() {
 	})
 
 	asp.Run()
-	fmt.Printf("%v\n", asp)
-	fmt.Printf("%v\n", asp.ActiveWindow())
-	fmt.Printf("%v\n", asp.ActiveWindow().RootPane())
-	fmt.Printf("%v\n", asp.ActiveWindow().RootPane().Left())
 }
 
 type HelloPane struct {
