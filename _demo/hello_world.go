@@ -24,13 +24,10 @@ func main() {
 			asp.Quit()
 		}
 		if ev.Ch == 115 {
-			asp.DebugPrint("split")
-
-			tmpPane := new(aspirin.BasePane)
-			tmpPane.Init()
-			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), tmpPane, 0)
+			newPane := new(aspirin.BasePane)
+			newPane.Init()
+			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, 0)
 		}
-
 	})
 
 	asp.Run()
