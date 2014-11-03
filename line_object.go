@@ -4,6 +4,7 @@ type LineObject interface {
 	setupEventLoop()
 
 	SetAction(func(ev Event))
+	RunAction(Event)
 	SetNext(LineObject)
 	Next() LineObject
 	SetPrev(LineObject)
@@ -24,6 +25,10 @@ type LineObjectBase struct {
 
 func (lob *LineObjectBase)SetAction(callback func(e Event)) {
 	lob.action = callback
+}
+
+func (lob *LineObjectBase)RunAction(e Event)  {
+	lob.action(e)
 }
 
 

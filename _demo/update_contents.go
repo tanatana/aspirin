@@ -14,14 +14,22 @@ func main() {
 	p.OnKey(func(ev aspirin.Event){
 		// aspirin.Printf_tb(0, 0, termbox.ColorDefault, termbox.ColorDefault, "onKey@%s\n", "MainPane")
 		// termbox.Flush()
-		tlo := new(aspirin.TextLineObject)
-		tlo.SetText(fmt.Sprintf("%v", ev))
-		p.AddLineObject(tlo)
+		if ev.Ch == 0 {
+			p.ActiveLineObject().RunAction(ev)
+		} else {
+			lo := new(aspirin.LineObjectBase)
+			lo.SetText(fmt.Sprintf("%v", lo))
+
+			lo.SetAction(func(e aspirin.Event){
+				loFromAction := aspirin.NewTextLineObject(fmt.Sprintf("%v from action", ev))
+				p.AddLineObject(loFromAction)
+			})
+
+			p.AddLineObject(lo)
+		}
+
 	})
 
-
-	// p.contents := [] aspirin.LineObject
-	// p.SetContents(contents)
 
 	p.SetSize(0, 0, w.Width(), w.Height())
 	w.SetInitialPane(p, true)
