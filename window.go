@@ -84,14 +84,16 @@ func (win *window)SplitPane(targetPane, newPane Pane, splitType SplitType) Pane{
 	}
 
 	targetPane.setParent(sp)
+
 	sp.setLeft(targetPane)
 	sp.Left().setSize(leftPaneSize.x, leftPaneSize.y, leftPaneSize.width, leftPaneSize.height);
-	// sp.setRight(newPane(win.paneCounter, ConcretePane, 0, 0, win.width, win.height))
+
 	sp.setRight(newPane)
 	sp.Right().setId(win.paneCounter);
 	sp.Right().setSize(0, 0, win.width, win.height)
 	sp.Right().setParent(sp)
 	sp.Right().setSize(rightPaneSize.x, rightPaneSize.y, rightPaneSize.width, rightPaneSize.height);
+
 	win.activePane    = sp.Right()
 	win.paneCounter += 1
 
