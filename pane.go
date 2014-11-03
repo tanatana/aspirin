@@ -29,9 +29,9 @@ type Pane interface {
 	Size() PaneSize
 	setParent(Pane) Pane
 
-	AddLineObject(LineObject)
-	ActiveLineObject() LineObject
-	setActiveLineObject(LineObject)
+	AddLine(Line)
+	ActiveLine() Line
+	setActiveLine(Line)
 	MoveNextObject()
 	MovePrevObject()
 }
@@ -53,8 +53,8 @@ type BasePane struct{
 	parent Pane
 	left, right Pane
 
-	rootLineObject LineObject
-	activeLineObject LineObject
+	rootLine Line
+	activeLine Line
 
 	onKey func(ev Event)
 	onMouse func(ev Event)
@@ -70,9 +70,9 @@ func (bp *BasePane)Init() {
 	bp.onMouse = (func(ev Event){})
 	bp.onError = (func(ev Event){})
 
-	rootLineObj := newRootLineObject()
-	bp.rootLineObject = rootLineObj
-	bp.activeLineObject = rootLineObj
+	rootLineObj := newRootLine()
+	bp.rootLine = rootLineObj
+	bp.activeLine = rootLineObj
 
 	bp.eventChannel = make(chan Event)
 	go bp.setupEventLoop()
@@ -85,11 +85,11 @@ func (bp *BasePane)SetSize(x, y, width, height int){
 	bp.size.height = height
 }
 
-func (bp *BasePane)update(x, y int, lo LineObject) {
+func (bp *BasePane)update(x, y int, lo Line) {
 	fgColor := termbox.ColorDefault
 	bgColor := termbox.ColorDefault
 
-	if (lo == bp.activeLineObject) {
+	if (lo == bp.activeLine) {
 		fgColor = termbox.ColorWhite
 		bgColor = termbox.ColorGreen
 	}
@@ -106,7 +106,7 @@ func (bp *BasePane)Update() {
 	x := bp.size.x
 	y := bp.size.y
 
-	bp.update(x, y, bp.rootLineObject.Next())
+	bp.update(x, y, bp.rootLine.Next())
 
 }
 
@@ -146,29 +146,29 @@ func (bp *BasePane)Size() PaneSize{
 	return bp.size
 }
 
-func (bp *BasePane)AddLineObject(lo LineObject) {
-	bp.activeLineObject.SetNext(lo)
-	lo.SetPrev(bp.activeLineObject)
-	bp.activeLineObject = lo
+func (bp *BasePane)AddLine(lo Line) {
+	bp.activeLine.SetNext(lo)
+	lo.SetPrev(bp.activeLine)
+	bp.activeLine = lo
 
 	bp.Update()
 }
 
-func (bp *BasePane)ActiveLineObject() LineObject{
-	return bp.activeLineObject
+func (bp *BasePane)ActiveLine() Line{
+	return bp.activeLine
 }
-func (bp *BasePane)setActiveLineObject(lo LineObject){
-	bp.activeLineObject = lo
+func (bp *BasePane)setActiveLine(lo Line){
+	bp.activeLine = lo
 }
 func (bp *BasePane)MoveNextObject(){
-	alo := bp.activeLineObject
+	alo := bp.activeLine
 	nlo := alo.Next()
-	bp.activeLineObject = nlo
+	bp.activeLine = nlo
 }
 func (bp *BasePane)MovePrevObject(){
-	alo := bp.activeLineObject
+	alo := bp.activeLine
 	plo := alo.Prev()
-	bp.activeLineObject = plo
+	bp.activeLine = plo
 }
 
 

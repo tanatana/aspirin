@@ -15,17 +15,17 @@ func main() {
 		// aspirin.Printf_tb(0, 0, termbox.ColorDefault, termbox.ColorDefault, "onKey@%s\n", "MainPane")
 		// termbox.Flush()
 		if ev.Ch == 0 {
-			p.ActiveLineObject().RunAction(ev)
+			p.ActiveLine().RunAction(ev)
 		} else {
-			lo := new(aspirin.LineObjectBase)
+			lo := new(aspirin.LineBase)
 			lo.SetText(fmt.Sprintf("%v", lo))
 
 			lo.SetAction(func(e aspirin.Event){
-				loFromAction := aspirin.NewTextLineObject(fmt.Sprintf("%v from action", ev))
-				p.AddLineObject(loFromAction)
+				loFromAction := aspirin.NewTextLine(fmt.Sprintf("%v from action", ev))
+				p.AddLine(loFromAction)
 			})
 
-			p.AddLineObject(lo)
+			p.AddLine(lo)
 		}
 
 	})
