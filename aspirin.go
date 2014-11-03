@@ -61,10 +61,6 @@ func (asp *aspirin)Quit(){
 	asp.EventChannel <- e
 }
 
-func (asp *aspirin)DebugPrint(message string){
-	// fmt.Printf("%s\n",message)
-}
-
 func setupEventLoop(ec chan Event) {
 	for {
 		ev := termbox.PollEvent()
