@@ -25,7 +25,9 @@ func main() {
 			lo.SetText(fmt.Sprintf("%v", lo))
 
 			lo.SetAction(func(e aspirin.Event){
-				loFromAction := aspirin.NewTextLine(fmt.Sprintf("%v from action", ev))
+				next := lo.Next()
+				prev := lo.Prev()
+				loFromAction := aspirin.NewTextLine(fmt.Sprintf("%v(next: %v, prev: %v) from action", &lo, &next, &prev))
 				p.AddLine(loFromAction, false)
 			})
 

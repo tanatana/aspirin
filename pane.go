@@ -89,6 +89,11 @@ func (bp *BasePane)update(x, y int, lo Line) {
 	fgColor := termbox.ColorDefault
 	bgColor := termbox.ColorDefault
 
+	if (lo == nil) {
+		return
+	}
+
+
 	if (lo == bp.activeLine) {
 		fgColor = termbox.ColorWhite
 		bgColor = termbox.ColorGreen
@@ -155,12 +160,6 @@ func (bp *BasePane)AddLine(lo Line, setActive bool) {
 	}
 
 	bp.Update()
-
-	// bp.activeLine.SetNext(lo)
-	// lo.SetPrev(bp.activeLine)
-	// bp.activeLine = lo
-
-	// bp.Update()
 }
 
 func (bp *BasePane)ActiveLine() Line{
@@ -172,13 +171,21 @@ func (bp *BasePane)setActiveLine(lo Line){
 func (bp *BasePane)MoveNextElement(){
 	alo := bp.activeLine
 	nlo := alo.Next()
-	bp.activeLine = nlo
-	bp.Update()
+	if nlo != nil {
+		bp.activeLine = nlo
+	}
+ 	bp.Update()
 }
 func (bp *BasePane)MovePrevElement(){
 	alo := bp.activeLine
+	if alo.Prev() == nil {
+		return
+	}
 	plo := alo.Prev()
-	bp.activeLine = plo
+	if plo != bp.rootLine {
+		bp.activeLine = plo
+	}
+
 	bp.Update()
 }
 
