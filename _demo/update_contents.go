@@ -12,8 +12,6 @@ func main() {
 	p := new(MainPane)
 	p.Init()
 	p.OnKey(func(ev aspirin.Event){
-		// aspirin.Printf_tb(0, 0, termbox.ColorDefault, termbox.ColorDefault, "onKey@%s\n", "MainPane")
-		// termbox.Flush()
 		if ev.Ch == 0 {
 			p.ActiveLine().RunAction(ev)
 		} else if ev.Ch == 106 {
