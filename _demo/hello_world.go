@@ -12,7 +12,8 @@ func main() {
 	p := new(MainPane)
 	p.Init()
 	p.OnKey(func(ev aspirin.Event) {
-		fmt.Printf("onKey@%s\n", "MainPane")
+		line := aspirin.NewTextLine("Hello, world")
+		p.AddLine(line, false)
 	})
 	p.SetSize(0, 0, w.Width(), w.Height())
 	w.SetInitialPane(p, true)
