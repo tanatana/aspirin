@@ -9,13 +9,7 @@ func main() {
 	asp := aspirin.NewAspirin()
 
 	w := aspirin.NewWindow("", asp.Width(), asp.Height())
-	p := new(MainPane)
-	p.Init()
-	p.OnKey(func(ev aspirin.Event) {
-		line := aspirin.NewTextLine("Hello, world")
-		p.AddLine(line, false)
-	})
-	p.SetSize(0, 0, w.Width(), w.Height())
+	p := newHelloPane()
 	w.SetInitialPane(p, true)
 	asp.AddWindow(w, true)
 
@@ -23,10 +17,15 @@ func main() {
 		if ev.Ch == 113 {
 			asp.Quit()
 		}
+
+
+		if ev.Ch == 83 {
+			newPane := newHelloPane()
+			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.SplitVirtical)
+		}
 		if ev.Ch == 115 {
-			newPane := new(aspirin.BasePane)
-			newPane.Init()
-			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, 0)
+			newPane := newHelloPane()
+			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.SplitHorizontal)
 		}
 	})
 
@@ -37,6 +36,16 @@ func main() {
 	fmt.Printf("%v\n", asp.ActiveWindow().RootPane().Left())
 }
 
-type MainPane struct {
+type HelloPane struct {
 	aspirin.BasePane
+}
+
+func newHelloPane() aspirin.Pane{
+	p := new(HelloPane)
+	p.Init()
+	p.OnKey(func(ev aspirin.Event) {
+		line := aspirin.NewTextLine(fmt.Sprintf("Hello, world (%v)", ev))
+		p.AddLine(line, false)
+	})
+	return p
 }

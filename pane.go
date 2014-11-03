@@ -6,6 +6,8 @@ import (
 )
 
 type Pane interface {
+	Init()
+
 	viewDidLoad()
 	setupEventLoop()
 
@@ -18,7 +20,7 @@ type Pane interface {
 
 	Update()
 
-	SetSize(int, int, int, int)
+	setSize(int, int, int, int)
 	Id() int
 	setId(int)
 	Left() Pane
@@ -43,10 +45,9 @@ type PaneSize struct {
 
 type SplitType int
 const (
-	VirticalSplit SplitType = iota
-	HorizontalSplit
+	SplitVirtical SplitType = iota
+	SplitHorizontal
 )
-
 type BasePane struct{
 	id int
 	size PaneSize
@@ -78,7 +79,7 @@ func (bp *BasePane)Init() {
 	go bp.setupEventLoop()
 }
 
-func (bp *BasePane)SetSize(x, y, width, height int){
+func (bp *BasePane)setSize(x, y, width, height int){
 	bp.size.x = x
 	bp.size.y = y
 	bp.size.width = width
