@@ -14,18 +14,23 @@ func main() {
 	asp.AddWindow(w, true)
 
 	asp.OnKey(func(ev aspirin.Event){
+		// LATIN SMALL LETTER 'q'
 		if ev.Ch == 113 {
 			asp.Quit()
 		}
-
-
+		// LATIN CAPITAL LETTER 'S'
 		if ev.Ch == 83 {
 			newPane := newHelloPane()
 			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.SplitVirtical)
 		}
+		// LATIN SMALL LETTER 's'
 		if ev.Ch == 115 {
 			newPane := newHelloPane()
 			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.SplitHorizontal)
+		}
+		// LATIN SMALL LETTER 'x'
+		if ev.Ch == 120 {
+			// asp.ActiveWindow().ClosePane(asp.ActiveWindow().ActivePane())
 		}
 	})
 
@@ -43,5 +48,8 @@ func newHelloPane() aspirin.Pane{
 		line := aspirin.NewTextLine(fmt.Sprintf("Hello, world (%v)", ev))
 		p.AddLine(line, false)
 	})
+	initLine := aspirin.NewTextLine(fmt.Sprintf("Hello, world"))
+	p.AddLine(initLine, false)
+
 	return p
 }
