@@ -94,7 +94,6 @@ func (bp *BasePane)update(x, y int, lo Line) {
 		return
 	}
 
-
 	if (lo == bp.activeLine) {
 		fgColor = termbox.ColorWhite
 		bgColor = termbox.ColorGreen
@@ -117,8 +116,6 @@ func (bp *BasePane)Update() {
 }
 
 func (bp *BasePane)viewDidLoad() {
-
-
 }
 
 func (bp *BasePane)Id() int{

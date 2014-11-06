@@ -74,7 +74,7 @@ func (win *window)SplitPane(targetPane, newPane Pane, splitType SplitType) Pane{
 	// 	panic("can't split")
 	// }
 	sp, leftPaneSize, rightPaneSize := NewSplitPane(win.paneCounter, targetPane, splitType)
-	win.activePane   = sp
+	// win.activePane   = sp
 
 	sp.setParent(targetPane.Parent())
 	if (targetPane.Parent().Left().Id() == targetPane.Id()) {
@@ -82,6 +82,8 @@ func (win *window)SplitPane(targetPane, newPane Pane, splitType SplitType) Pane{
 	} else {
 		sp.Parent().setRight(sp)
 	}
+
+	sp.viewDidLoad()
 
 	targetPane.setParent(sp)
 
@@ -97,6 +99,8 @@ func (win *window)SplitPane(targetPane, newPane Pane, splitType SplitType) Pane{
 	win.activePane    = sp.Right()
 	win.paneCounter += 1
 
+	newPane.viewDidLoad()
+
 	return sp.Right()
 }
 
@@ -109,5 +113,8 @@ func (w *window)SetInitialPane(child Pane, changeActivePane bool) {
 	if (changeActivePane) {
 		w.activePane = child
 	}
+
+	child.viewDidLoad()
+
 	w.paneCounter += 1
 }

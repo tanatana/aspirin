@@ -1,15 +1,22 @@
 package aspirin
 
+import (
+	"fmt"
+)
+
 type SplitPane struct {
 	BasePane
 	Type SplitType
 }
 
 func NewSplitPane(splitPaneId int,targetPane Pane, splitType SplitType) (Pane, PaneSize, PaneSize){
-	var sp Pane
+	// var sp Pane
+	// sp = new(SplitPane)
+
+	sp  := new(SplitPane)
 	var leftPaneSize, rightPaneSize PaneSize
 
-	sp = new(SplitPane)
+	sp.Init()
 	sp.setId(splitPaneId)
 
 	if (splitType == SplitVirtical) {
@@ -59,5 +66,8 @@ func NewSplitPane(splitPaneId int,targetPane Pane, splitType SplitType) (Pane, P
 	return sp, leftPaneSize, rightPaneSize
 }
 
-func (rp *SplitPane)viewDidLoad() {
+func (sp *SplitPane)viewDidLoad() {
+
+	initLine := NewTextLine(fmt.Sprintf("-"))
+	sp.AddLine(initLine, false)
 }
