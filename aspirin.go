@@ -11,6 +11,10 @@ type aspirin struct {
 	windowCounter int
 	width, height int
 	onKey func(ev Event)
+	onResize func(ev Event)
+	onMouse func(ev Event)
+	onError func(ev Event)
+	beforeQuite func(ev Event)
 	EventChannel chan Event
 }
 
@@ -48,6 +52,9 @@ loop:
 			go asp.onKey(ev)
 		case EventQuit:
 			// fmt.Printf("EventQuit was handled\n");
+			if asp.beforeQuite != nil {
+				asp.beforeQuite(ev);
+			}
 			break loop
 		}
 		asp.activeWindow.eventChannel <- ev
