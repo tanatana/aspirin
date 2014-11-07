@@ -34,6 +34,12 @@ func main() {
 		}
 	})
 
+	asp.OnResize(func(ev aspirin.Event){
+		pane := asp.ActiveWindow().ActivePane()
+		line := aspirin.NewTextLine(fmt.Sprintf("terminal resized (%v)", ev))
+		pane.AddLine(line, false)
+	})
+
 	asp.Run()
 }
 

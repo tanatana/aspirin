@@ -21,6 +21,15 @@ type aspirin struct {
 func (asp *aspirin)OnKey(f func(ev Event)){
 	asp.onKey = f
 }
+func (asp *aspirin)OnResize(f func(ev Event)){
+	asp.onResize = f
+}
+func (asp *aspirin)OnMouse(f func(ev Event)){
+	asp.onMouse = f
+}
+func (asp *aspirin)OnError(f func(ev Event)){
+	asp.onError = f
+}
 
 func (asp *aspirin)AddWindow(w *window, changeActiveWindow bool) {
 	w.id = asp.windowCounter
@@ -50,6 +59,12 @@ loop:
 		switch ev.Type {
 		case termbox.EventKey:
 			go asp.onKey(ev)
+		case termbox.EventResize:
+			go asp.onResize(ev)
+		case termbox.EventMouse:
+			go asp.onMouse(ev)
+		case termbox.EventError:
+			go asp.onError(ev)
 		case EventQuit:
 			// fmt.Printf("EventQuit was handled\n");
 			if asp.beforeQuite != nil {
