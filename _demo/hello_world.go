@@ -34,12 +34,6 @@ func main() {
 		}
 	})
 
-	asp.OnResize(func(ev aspirin.Event){
-		pane := asp.ActiveWindow().ActivePane()
-		line := aspirin.NewTextLine(fmt.Sprintf("terminal resized (%v)", ev))
-		pane.AddLine(line, false)
-	})
-
 	asp.Run()
 }
 
@@ -54,6 +48,12 @@ func newHelloPane() aspirin.Pane{
 		line := aspirin.NewTextLine(fmt.Sprintf("Hello, world (%v)", ev))
 		p.AddLine(line, false)
 	})
+
+	p.OnResize(func(ev aspirin.Event){
+		line := aspirin.NewTextLine(fmt.Sprintf("terminal resized (%v)", ev))
+		 p.AddLine(line, false)
+	})
+
 	initLine := aspirin.NewTextLine(fmt.Sprintf("Hello, world"))
 	p.AddLine(initLine, false)
 

@@ -221,6 +221,13 @@ func (bp *BasePane)setupEventLoop() {
 		switch ev.Type {
 		case termbox.EventKey:
 			go bp.onKey(ev)
+		case termbox.EventResize:
+			go bp.onResize(ev)
+		case termbox.EventMouse:
+			go bp.onMouse(ev)
+		case termbox.EventError:
+			go bp.onError(ev)
+
 		}
 	}
 }

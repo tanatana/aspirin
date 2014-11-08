@@ -60,7 +60,9 @@ loop:
 		case termbox.EventKey:
 			go asp.onKey(ev)
 		case termbox.EventResize:
-			go asp.onResize(ev)
+			if (asp.onResize != nil){
+				go asp.onResize(ev)
+			}
 		case termbox.EventMouse:
 			go asp.onMouse(ev)
 		case termbox.EventError:
