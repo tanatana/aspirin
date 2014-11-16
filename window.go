@@ -64,9 +64,59 @@ func (w *window)Height() int{
 	return w.height
 }
 
-func (w *window)MoveToNextPane() {}
+func (w *window)MoveToNextPane() Pane{
+	nextPane := w.findNextPane(w.activePane)
+	if nextPane == nil {
+		nextPane = w.findFirstPane(w.rootPane)
+	}
+	w.activePane = nextPane
+
+	return w.activePane
+}
 func (w *window)MoveToPrevPane() {}
 func (w *window)MoveToPane() {}
+
+func (w *window)findNextPane(target Pane) Pane{
+	parent := target.Parent()
+	if parent.Parent() == nil {
+		return nil
+	}
+
+	if parent.Left().Id() == target.Id() {
+		// 昔はPaneにpaneTypeってのあって比較できたけどいまは
+		// rowPainを匿名フィールドに持つPainインターフェースを
+		// 実装したオブジェクトってだけなので見極めるすべがない
+		// 枝の状態から推定は出来るけど
+
+		// 自分が左にぶら下がってる状態で，兄弟の右が分割ペインなら
+		// その右ペインを探しに行く
+		// そうでなければ右を返す
+		// if parent.Right().paneType == VirticalSplitPane ||
+		// 	parent.Right().paneType == HorizontalSplitPane {
+		// 	return findPrevPane(parent.Right())
+		// } else {
+		// 	return parent.Right()
+		// }
+	}
+
+	// 自分が右にぶら下がってる状況でのNextを探す場合は
+	// いったん上に戻って右を探す
+	if parent.Right().Id() == target.Id() {
+		return w.findNextPane(parent)
+	}
+
+	panic("something wrong")
+}
+
+func (w *window)findFirstPane(target Pane) Pane{
+	// findNextPaneと同様の問題がある
+	// if target.Left().paneType == VirticalSplitPane ||
+	// 	target.Left().paneType == HorizontalSplitPane {
+	// 	return findFirstPane(target.Left())
+	// }
+	return target.Left()
+}
+func (w *window)findLastPane(p Pane) {}
 
 func (win *window)SplitPane(targetPane, newPane Pane, splitType SplitType) Pane{
 	// if (targetPane.parent == nil) {
