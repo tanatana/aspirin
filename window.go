@@ -2,6 +2,7 @@ package aspirin
 
 import (
 	"github.com/nsf/termbox-go"
+	"fmt"
 )
 
 type window struct {
@@ -35,10 +36,7 @@ func NewWindow(title string, width, height int) *window{
 	w.eventChannel = make(chan Event)
 	w.onKey = (func(e Event){})
 
-	p := new(RootPane)
-	p.Init()
-	p.setId(w.paneCounter)
-	p.setSize(0, 0, width, height)
+	p := newRootPane(w.paneCounter, width, height)
 	w.rootPane = p
 	w.activePane = p
 	w.paneCounter += 1
@@ -65,66 +63,120 @@ func (w *window)Height() int{
 }
 
 func (w *window)MoveToNextPane() Pane{
-	nextPane := w.findNextPane(w.activePane)
-	if nextPane == nil {
-		nextPane = w.findFirstPane(w.rootPane)
-	}
-	w.activePane = nextPane
+	nextPane := findNextPane(w.activePane)
 
+	if nextPane == nil {
+		nextPane = findFirstPane(w.rootPane)
+	}
+
+	debugLine := NewTextLine(fmt.Sprintf("next pane id is %v", nextPane.Id()))
+	w.activePane.AddLine(debugLine, false)
+
+	w.activePane = nextPane
 	return w.activePane
 }
-func (w *window)MoveToPrevPane() {}
+func (w *window)MoveToPrevPane() Pane{
+	prevPane := findPrevPane(w.activePane)
+
+	if prevPane == nil {
+		prevPane = findLastPane(w.rootPane)
+	}
+
+	debugLine := NewTextLine(fmt.Sprintf("prev pane id is %v", prevPane.Id()))
+	w.activePane.AddLine(debugLine, false)
+
+	w.activePane = prevPane
+	return w.activePane
+}
+func (w *window)MoveToFirstPane() Pane{
+	firstPane := findFirstPane(w.rootPane)
+	w.activePane = firstPane
+	return w.activePane
+}
+func (w *window)MoveToLastPane() Pane{
+	lastPane := findLastPane(w.rootPane)
+	w.activePane = lastPane
+	return w.activePane
+}
 func (w *window)MoveToPane() {}
 
-func (w *window)findNextPane(target Pane) Pane{
+func findNextPane(target Pane) Pane{
 	parent := target.Parent()
 	if parent.Parent() == nil {
 		return nil
 	}
 
 	if parent.Left().Id() == target.Id() {
-		// 昔はPaneにpaneTypeってのあって比較できたけどいまは
-		// rowPainを匿名フィールドに持つPainインターフェースを
-		// 実装したオブジェクトってだけなので見極めるすべがない
-		// 枝の状態から推定は出来るけど
-
 		// 自分が左にぶら下がってる状態で，兄弟の右が分割ペインなら
 		// その右ペインを探しに行く
 		// そうでなければ右を返す
-		// if parent.Right().paneType == VirticalSplitPane ||
-		// 	parent.Right().paneType == HorizontalSplitPane {
-		// 	return findPrevPane(parent.Right())
-		// } else {
-		// 	return parent.Right()
-		// }
+		if parent.Right().Role() == PRVirticalSplit ||
+			parent.Right().Role() == PRHorizontalSplit {
+			return findNextPane(parent.Right())
+		} else {
+			return parent.Right()
+		}
 	}
 
 	// 自分が右にぶら下がってる状況でのNextを探す場合は
 	// いったん上に戻って右を探す
 	if parent.Right().Id() == target.Id() {
-		return w.findNextPane(parent)
+		return findNextPane(parent)
 	}
 
 	panic("something wrong")
 }
+func findPrevPane(target Pane) Pane{
+	parent := target.Parent()
+	if parent.Role() == PRRoot {
+		return nil
+	}
 
-func (w *window)findFirstPane(target Pane) Pane{
-	// findNextPaneと同様の問題がある
-	// if target.Left().paneType == VirticalSplitPane ||
-	// 	target.Left().paneType == HorizontalSplitPane {
-	// 	return findFirstPane(target.Left())
-	// }
+	if parent.Right().Id() == target.Id() {
+		if parent.Left().Role() == PRVirticalSplit ||
+			parent.Left().Role() == PRHorizontalSplit {
+			return findPrevPane(parent.Left())
+		} else {
+			return parent.Left()
+		}
+	}
+
+	if parent.Left().Id() == target.Id() {
+		return findPrevPane(parent)
+	}
+	panic("something wrong")
+}
+
+func findFirstPane(target Pane) Pane{
+	if target.Left().Role() == PRVirticalSplit ||
+		target.Left().Role() == PRHorizontalSplit {
+		return findFirstPane(target.Left())
+	}
 	return target.Left()
 }
-func (w *window)findLastPane(p Pane) {}
 
-func (win *window)SplitPane(targetPane, newPane Pane, splitType SplitType) Pane{
+func findLastPane(target Pane) Pane{
+	if target.Right() != nil {
+		if target.Right().Role() == PRVirticalSplit ||
+			target.Right().Role() == PRHorizontalSplit {
+			return findLastPane(target.Right())
+		}
+		return target.Right()
+	} else if target.Left().Role() == PRVirticalSplit ||
+		target.Left().Role() == PRHorizontalSplit {
+		return findLastPane(target.Left())
+	}
+	return target.Left()
+
+}
+
+func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 	// if (targetPane.parent == nil) {
 	// 	// TODO: エラーどうしよ
 	// 	panic("can't split")
 	// }
-	sp, leftPaneSize, rightPaneSize := NewSplitPane(win.paneCounter, targetPane, splitType)
-	// win.activePane   = sp
+	sp, leftPaneSize, rightPaneSize := NewSplitPane(win.paneCounter, targetPane, paneRole)
+	win.paneCounter += 1
 
 	sp.setParent(targetPane.Parent())
 	if (targetPane.Parent().Left().Id() == targetPane.Id()) {

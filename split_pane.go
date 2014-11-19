@@ -6,10 +6,9 @@ import (
 
 type SplitPane struct {
 	BasePane
-	Type SplitType
 }
 
-func NewSplitPane(splitPaneId int,targetPane Pane, splitType SplitType) (Pane, PaneSize, PaneSize){
+func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, PaneSize, PaneSize){
 	// var sp Pane
 	// sp = new(SplitPane)
 
@@ -18,8 +17,9 @@ func NewSplitPane(splitPaneId int,targetPane Pane, splitType SplitType) (Pane, P
 
 	sp.Init()
 	sp.setId(splitPaneId)
+	sp.setRole(paneRole)
 
-	if (splitType == SplitVirtical) {
+	if (paneRole == PRVirticalSplit) {
 		spX := targetPane.Size().x + targetPane.Size().width/2
 		spY := targetPane.Size().y
 		spWidth := 1
@@ -40,7 +40,7 @@ func NewSplitPane(splitPaneId int,targetPane Pane, splitType SplitType) (Pane, P
 		if (targetPane.Size().width % 2 == 1) {
 			rightPaneSize.width += spWidth
 		}
-	} else if (splitType == SplitHorizontal) {
+	} else if (paneRole == PRHorizontalSplit) {
 		spX := targetPane.Size().x
 		spY := targetPane.Size().y + targetPane.Size().height/2
 		spWidth := targetPane.Size().width
@@ -67,7 +67,6 @@ func NewSplitPane(splitPaneId int,targetPane Pane, splitType SplitType) (Pane, P
 }
 
 func (sp *SplitPane)viewDidLoad() {
-
 	initLine := NewTextLine(fmt.Sprintf("-"))
 	sp.AddLine(initLine, false)
 }

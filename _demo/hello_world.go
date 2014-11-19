@@ -21,12 +21,20 @@ func main() {
 		// LATIN CAPITAL LETTER 'S'
 		if ev.Ch == 83 {
 			newPane := newHelloPane()
-			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.SplitVirtical)
+			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.PRVirticalSplit)
 		}
 		// LATIN SMALL LETTER 's'
 		if ev.Ch == 115 {
 			newPane := newHelloPane()
-			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.SplitHorizontal)
+			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.PRHorizontalSplit)
+		}
+		// LATIN SMALL LETTER '['
+		if ev.Ch == 91 {
+			asp.ActiveWindow().MoveToPrevPane()
+		}
+		// LATIN SMALL LETTER ']'
+		if ev.Ch == 93 {
+			asp.ActiveWindow().MoveToNextPane()
 		}
 		// LATIN SMALL LETTER 'x'
 		if ev.Ch == 120 {
@@ -58,4 +66,9 @@ func newHelloPane() aspirin.Pane{
 	p.AddLine(initLine, false)
 
 	return p
+}
+
+func (hp *HelloPane)viewDidLoad() {
+	initLine := aspirin.NewTextLine(fmt.Sprintf("my pane id is %v", hp.Id()))
+	hp.AddLine(initLine, false)
 }

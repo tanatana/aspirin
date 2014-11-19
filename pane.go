@@ -22,7 +22,9 @@ type Pane interface {
 
 	setSize(int, int, int, int)
 	Id() int
-	setId(int)
+	setId(int) int
+	Role() PaneRole
+	setRole(PaneRole) PaneRole
 	Left() Pane
 	setLeft(Pane) Pane
 	Right() Pane
@@ -43,16 +45,20 @@ type PaneSize struct {
 	x, y, width, height int
 }
 
-type SplitType int
+type PaneRole int
 const (
-	SplitVirtical SplitType = iota
-	SplitHorizontal
+	PRDisplay PaneRole = iota
+	PRRoot
+	PRVirticalSplit
+	PRHorizontalSplit
 )
+
 type BasePane struct{
 	id int
 	size PaneSize
 	parent Pane
 	left, right Pane
+	role PaneRole
 
 	rootLine Line
 	activeLine Line
@@ -121,8 +127,18 @@ func (bp *BasePane)viewDidLoad() {
 func (bp *BasePane)Id() int{
 	return bp.id
 }
-func (bp *BasePane)setId(id int){
+
+func (bp *BasePane)Role() PaneRole{
+	return bp.role
+}
+func (bp *BasePane)setRole(role PaneRole) PaneRole{
+	bp.role = role
+	return bp.role
+}
+
+func (bp *BasePane)setId(id int) int{
 	bp.id = id
+	return id
 }
 func (bp *BasePane)Left() Pane{
 	return bp.left
