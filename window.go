@@ -102,25 +102,30 @@ func (w *window)MoveToPane() {}
 
 func findNextPane(target Pane) Pane{
 	parent := target.Parent()
+
 	if parent.Parent() == nil {
 		return nil
 	}
 
-	if parent.Left().Id() == target.Id() {
-		// 自分が左にぶら下がってる状態で，兄弟の右が分割ペインなら
-		// その右ペインを探しに行く
-		// そうでなければ右を返す
+	// targetが左枝にぶら下がっている場合，
+	// 右ペインがdisplayペインなら右ペインを返し，
+	// 右ペインがsplitペインなら右ペインを掘り下げる
+	if (parent.Left().Id() == target.Id()){
+		if (parent.Right().Role() == PRDisplay) {
+			return parent.Right()
+		}
 		if parent.Right().Role() == PRVirticalSplit ||
 			parent.Right().Role() == PRHorizontalSplit {
 			return findNextPane(parent.Right())
-		} else {
-			return parent.Right()
 		}
 	}
-
-	// 自分が右にぶら下がってる状況でのNextを探す場合は
-	// いったん上に戻って右を探す
-	if parent.Right().Id() == target.Id() {
+	// targetが右枝にぶら下がっている場合
+	// targetのroleがsplitペインなら左の枝を掘り進み，
+	// そうでないなら一階層上に上がる
+	if target.Role() == PRVirticalSplit ||
+		target.Role() == PRHorizontalSplit {
+		return findNextPane(target.Left())
+	} else {
 		return findNextPane(parent)
 	}
 
