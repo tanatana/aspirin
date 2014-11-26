@@ -63,16 +63,17 @@ func (w *window)Height() int{
 }
 
 func (w *window)MoveToNextPane() Pane{
-	nextPane := findNextPane(w.activePane)
+	neighbhorPaneList := findNeighborPane(w.rootPane, w.activePane, nil)
 
-	if nextPane == nil {
-		nextPane = findFirstPane(w.rootPane)
+
+	if neighbhorPaneList == nil {
+		// nextPane = findFirstPane(w.rootPane)
 	}
 
-	debugLine := NewTextLine(fmt.Sprintf("next pane id is %v", nextPane.Id()))
+	debugLine := NewTextLine(fmt.Sprintf("next pane id is %v", neighbhorPaneList))
 	w.activePane.AddLine(debugLine, false)
 
-	w.activePane = nextPane
+	// w.activePane = nextPane
 	return w.activePane
 }
 func (w *window)MoveToPrevPane() Pane{
@@ -101,55 +102,35 @@ func (w *window)MoveToLastPane() Pane{
 func (w *window)MoveToPane() {}
 
 func findNextPane(target Pane) Pane{
-	parent := target.Parent()
-
-	if parent.Parent() == nil {
-		return nil
-	}
-
-	// targetが左枝にぶら下がっている場合，
-	// 右ペインがdisplayペインなら右ペインを返し，
-	// 右ペインがsplitペインなら右ペインを掘り下げる
-	if (parent.Left().Id() == target.Id()){
-		if (parent.Right().Role() == PRDisplay) {
-			return parent.Right()
-		}
-		if parent.Right().Role() == PRVirticalSplit ||
-			parent.Right().Role() == PRHorizontalSplit {
-			return findNextPane(parent.Right())
-		}
-	}
-	// targetが右枝にぶら下がっている場合
-	// targetのroleがsplitペインなら左の枝を掘り進み，
-	// そうでないなら一階層上に上がる
-	if target.Role() == PRVirticalSplit ||
-		target.Role() == PRHorizontalSplit {
-		return findNextPane(target.Left())
-	} else {
-		return findNextPane(parent)
-	}
-
 	panic("something wrong")
 }
 func findPrevPane(target Pane) Pane{
-	parent := target.Parent()
-	if parent.Role() == PRRoot {
-		return nil
-	}
+	panic("something wrong")
+}
 
-	if parent.Right().Id() == target.Id() {
-		if parent.Left().Role() == PRVirticalSplit ||
-			parent.Left().Role() == PRHorizontalSplit {
-			return findPrevPane(parent.Left())
-		} else {
-			return parent.Left()
+func findNeighborPane(root, target Pane, neighbhor []Pane) []Pane{
+
+	if root.Role() == PRDisplay {
+		neighbhor = append(neighbhor, root)
+		if len(neighbhor) > 3 {
+			neighbhor = neighbhor[1:]
 		}
 	}
 
-	if parent.Left().Id() == target.Id() {
-		return findPrevPane(parent)
+	if root.Left() != nil {
+		neighbhor = findNeighborPane(root.Left(), target, neighbhor)
 	}
-	panic("something wrong")
+
+	if root.Right() != nil{
+		neighbhor = findNeighborPane(root.Right(), target, neighbhor)
+	}
+
+	if target.Id() == root.Id()  {
+		return neighbhor
+	}
+
+
+	return neighbhor
 }
 
 func findFirstPane(target Pane) Pane{
