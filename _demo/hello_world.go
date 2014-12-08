@@ -36,6 +36,14 @@ func main() {
 		if ev.Ch == 93 {
 			asp.ActiveWindow().MoveToNextPane()
 		}
+		// LATIN SMALL LETTER '{'
+		if ev.Ch == 123 {
+			asp.ActiveWindow().MoveToFirstPane()
+		}
+		// LATIN SMALL LETTER '}'
+		if ev.Ch == 125 {
+			asp.ActiveWindow().MoveToLastPane()
+		}
 		// LATIN SMALL LETTER 'x'
 		if ev.Ch == 120 {
 			// asp.ActiveWindow().ClosePane(asp.ActiveWindow().ActivePane())

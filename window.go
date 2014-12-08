@@ -2,7 +2,6 @@ package aspirin
 
 import (
 	"github.com/nsf/termbox-go"
-	"fmt"
 )
 
 type window struct {
@@ -81,26 +80,34 @@ func (w *window)updateDisplayPaneList(rootPane Pane) {
 }
 func (w *window)MoveToNextPane() Pane{
 	// FIXME: pending
-    debugLine := NewTextLine(fmt.Sprintf("current display length: %v", w.displayPaneList.length))
-    w.activePane.AddLine(debugLine, false)
+	pn := w.displayPaneList.Index(w.activePane)
+
+	if pn.next == nil {
+		return w.MoveToFirstPane()
+	}
+	w.activePane = pn.NextPane()
 
 	return w.activePane
 }
 func (w *window)MoveToPrevPane() Pane{
 	// FIXME: pending
-    debugLine := NewTextLine(fmt.Sprintf("current display length: %v", w.displayPaneList.length))
-    w.activePane.AddLine(debugLine, false)
+	pn := w.displayPaneList.Index(w.activePane)
+
+	if pn.prev == nil {
+		return w.MoveToLastPane()
+	}
+	w.activePane = pn.PrevPane()
 
 	return w.activePane
 }
-// func (w *window)MoveToFirstPane() Pane{}
-// func (w *window)MoveToLastPane()  Pane{}
-// func (w *window)MoveToPane() {}
-
-// func findNextPane (target Pane) Pane{}
-// func findPrevPane (target Pane) Pane{}
-// func findFirstPane(target Pane) Pane{}
-// func findLastPane (target Pane) Pane{}
+func (w *window)MoveToFirstPane() Pane{
+	w.activePane = w.displayPaneList.FirstPane()
+	return w.activePane
+}
+func (w *window)MoveToLastPane()  Pane{
+	w.activePane = w.displayPaneList.LastPane()
+	return w.activePane
+}
 
 func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 	// if (targetPane.parent == nil) {

@@ -13,12 +13,28 @@ type paneNode struct{
 	prev *paneNode
 }
 
-func (pl *paneList)First() Pane{
+func (pl *paneList)FirstPane() Pane{
 	return pl.first.self
 }
-func (pl *paneList)Last() Pane{
-	return pl.first.self
+func (pl *paneList)LastPane() Pane{
+	return pl.last.self
 }
+func (pl *paneList)Index(targetPane Pane) *paneNode{
+	return pl._Index(pl.first, targetPane)
+}
+
+func (pl *paneList)_Index(targetNode *paneNode, targetPane Pane) *paneNode{
+	if targetNode.self == targetPane {
+		return targetNode
+	}
+
+	if targetNode.next != nil {
+		return pl._Index(targetNode.next, targetPane)
+	}
+
+	return nil
+}
+
 func (pl *paneList)Push(p Pane) *paneList{
 	// ary = [1,2,3]
 	// ary.push(4) #=> [1,2,3,4]
@@ -89,6 +105,20 @@ func (pn *paneNode)Next() *paneNode{
 func (pn *paneNode)Prev() *paneNode{
 	if pn.prev != nil {
 		return pn.prev
+	}
+
+	return nil
+}
+func (pn *paneNode)NextPane() Pane{
+	if pn.next != nil {
+		return pn.next.self
+	}
+
+	return nil
+}
+func (pn *paneNode)PrevPane() Pane{
+	if pn.prev != nil {
+		return pn.prev.self
 	}
 
 	return nil
