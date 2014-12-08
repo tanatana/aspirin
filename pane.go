@@ -120,10 +120,9 @@ func (bp *BasePane)Update() {
 	bp.update(x, y, bp.rootLine.Next())
 
 }
-
 func (bp *BasePane)viewDidLoad() {
-}
 
+}
 func (bp *BasePane)Id() int{
 	return bp.id
 }

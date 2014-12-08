@@ -10,7 +10,7 @@ func main() {
 
 	w := aspirin.NewWindow("", asp.Width(), asp.Height())
 	p := newHelloPane()
-	w.SetInitialPane(p, true)
+	w.SetInitialPane(p)
 	asp.AddWindow(w, true)
 
 	asp.OnKey(func(ev aspirin.Event){
@@ -59,16 +59,15 @@ func newHelloPane() aspirin.Pane{
 
 	p.OnResize(func(ev aspirin.Event){
 		line := aspirin.NewTextLine(fmt.Sprintf("terminal resized (%v)", ev))
-		 p.AddLine(line, false)
+		p.AddLine(line, false)
 	})
-
-	initLine := aspirin.NewTextLine(fmt.Sprintf("Hello, world"))
-	p.AddLine(initLine, false)
 
 	return p
 }
 
+
+// 名前空間違うから動かないよこれ
 func (hp *HelloPane)viewDidLoad() {
-	initLine := aspirin.NewTextLine(fmt.Sprintf("my pane id is %v", hp.Id()))
-	hp.AddLine(initLine, false)
+	line := aspirin.NewTextLine(fmt.Sprintf("Hello, World! (%v)", hp))
+	hp.AddLine(line, false)
 }
