@@ -16,6 +16,9 @@ type aspirin struct {
 	onError func(ev Event)
 	beforeQuite func(ev Event)
 	EventChannel chan Event
+
+
+	Debug bool
 }
 
 func (asp *aspirin)OnKey(f func(ev Event)){
@@ -31,6 +34,9 @@ func (asp *aspirin)OnError(f func(ev Event)){
 	asp.onError = f
 }
 
+func (asp *aspirin)Windows() []*window {
+	return asp.windows
+}
 func (asp *aspirin)AddWindow(w *window, changeActiveWindow bool) {
 	w.id = asp.windowCounter
 	if w.title == "" {
@@ -43,13 +49,58 @@ func (asp *aspirin)AddWindow(w *window, changeActiveWindow bool) {
 	}
 	asp.windowCounter += 1
 }
+func (asp *aspirin)MoveToWindow(target *window){
+	asp.activeWindow = target
+}
 
+func (asp *aspirin)MoveToNextWindow() *window{
+	nextWin := asp.findNextWindow(asp.activeWindow)
+	asp.MoveToWindow(nextWin)
+	return nextWin
+}
+func (asp *aspirin)MoveToPrevWindow() *window{
+	prevWin := asp.findPrevWindow(asp.activeWindow)
+	asp.MoveToWindow(prevWin)
+	return prevWin
+}
+
+func (asp *aspirin)findNextWindow(targetWin *window) *window{
+	winsMaxIndex := len(asp.windows) - 1
+
+	for index, win := range asp.windows {
+		if win == targetWin {
+			if index == winsMaxIndex {
+				return asp.windows[0]
+			}
+			return asp.windows[index + 1]
+		}
+	}
+	panic("oops! something wrong!")
+}
+func (asp *aspirin)findPrevWindow(targetWin *window)  *window{
+	for index, win := range asp.windows {
+		if win == targetWin {
+			if index == 0 {
+				return asp.windows[0]
+			}
+			return asp.windows[index - 1]
+		}
+	}
+	panic("oops! something wrong!")
+}
 func (asp *aspirin)ActiveWindow() *window{
 	return asp.activeWindow
 }
 
 
 func (asp *aspirin)Run(){
+	if asp.Debug {
+		dw := NewWindow("debug-window", asp.Width(), asp.Height())
+		p := newDebugPane()
+		dw.SetInitialPane(p)
+		asp.AddWindow(dw, false)
+	}
+
 	go setupEventLoop(asp.EventChannel)
 
 loop:
@@ -117,7 +168,6 @@ func NewAspirin() *aspirin{
 	return asp
 }
 
-
 func NewAspirinApp() *aspirin{
 	err := termbox.Init()
 	if err != nil {
@@ -138,17 +188,17 @@ func NewAspirinApp() *aspirin{
 
 // print aspirin state for debugging
 func Print_tb(x, y int, fg, bg termbox.Attribute, msg string) {
-	for _, c := range msg {
-		termbox.SetCell(x, y, c, fg, bg)
-		x++
-	}
+       for _, c := range msg {
+               termbox.SetCell(x, y, c, fg, bg)
+               x++
+       }
 }
 
 func Printf_tb(x, y int, fg, bg termbox.Attribute, format string, args ...interface{}) {
-	s := fmt.Sprintf(format, args...)
-	Print_tb(x, y, fg, bg, s)
+       s := fmt.Sprintf(format, args...)
+       Print_tb(x, y, fg, bg, s)
 }
 
 func Flush() {
-	termbox.Flush()
+       termbox.Flush()
 }

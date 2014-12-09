@@ -13,6 +13,8 @@ func main() {
 	w.SetInitialPane(p)
 	asp.AddWindow(w, true)
 
+	asp.Debug = true
+
 	asp.OnKey(func(ev aspirin.Event){
 		// LATIN SMALL LETTER 'q'
 		if ev.Ch == 113 {
@@ -38,12 +40,22 @@ func main() {
 		}
 		// LATIN SMALL LETTER '{'
 		if ev.Ch == 123 {
-			asp.ActiveWindow().MoveToFirstPane()
+			asp.MoveToPrevWindow()
 		}
 		// LATIN SMALL LETTER '}'
 		if ev.Ch == 125 {
-			asp.ActiveWindow().MoveToLastPane()
+			asp.MoveToNextWindow()
 		}
+		// LATIN SMALL LETTER 'w'
+		if ev.Ch == 119 {
+			line := aspirin.NewTextLine(fmt.Sprintf("windows: (%v)", asp.Windows()))
+			asp.ActiveWindow().ActivePane().AddLine(line, false)
+
+			line2 := aspirin.NewTextLine(fmt.Sprintf("current window: (%v)", asp.ActiveWindow()))
+			asp.ActiveWindow().ActivePane().AddLine(line2, false)
+
+		}
+
 		// LATIN SMALL LETTER 'x'
 		if ev.Ch == 120 {
 			// asp.ActiveWindow().ClosePane(asp.ActiveWindow().ActivePane())
