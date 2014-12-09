@@ -51,6 +51,8 @@ func (asp *aspirin)AddWindow(w *window, changeActiveWindow bool) {
 }
 func (asp *aspirin)MoveToWindow(target *window){
 	asp.activeWindow = target
+
+	asp.RefleshScreen()
 }
 
 func (asp *aspirin)MoveToNextWindow() *window{
@@ -129,6 +131,11 @@ loop:
 	}
 }
 
+func (asp *aspirin)RefleshScreen() {
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	asp.ActiveWindow().displayPaneList.ForEach(func (p Pane) {p.Update()})
+}
+
 func (asp *aspirin)Quit(){
 	termbox.Close()
 	var e Event
@@ -150,7 +157,6 @@ func (asp *aspirin)Width() int{
 func (asp *aspirin)Height() int{
 	return asp.height
 }
-
 
 func NewAspirin() *aspirin{
 	asp := new(aspirin)

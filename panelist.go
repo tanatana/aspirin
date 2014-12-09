@@ -20,19 +20,28 @@ func (pl *paneList)LastPane() Pane{
 	return pl.last.self
 }
 func (pl *paneList)Index(targetPane Pane) *paneNode{
-	return pl._Index(pl.first, targetPane)
+	return _Index(pl.first, targetPane)
 }
-
-func (pl *paneList)_Index(targetNode *paneNode, targetPane Pane) *paneNode{
+func _Index(targetNode *paneNode, targetPane Pane) *paneNode{
 	if targetNode.self == targetPane {
 		return targetNode
 	}
 
 	if targetNode.next != nil {
-		return pl._Index(targetNode.next, targetPane)
+		return _Index(targetNode.next, targetPane)
 	}
 
 	return nil
+}
+func (pl *paneList)ForEach(f func(Pane)) {
+	_ForEach(pl.first, f)
+}
+
+func _ForEach(iter *paneNode, f func(Pane)) {
+	f(iter.self)
+	if (iter.next != nil) {
+		_ForEach(iter.next, f)
+	}
 }
 
 func (pl *paneList)Push(p Pane) *paneList{
