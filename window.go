@@ -45,6 +45,12 @@ func NewWindow(title string, width, height int) *window{
 
 	return w
 }
+func (w *window)Init() {
+	go w.setupEventLoop()
+}
+func (w *window)OnKey(f func(ev Event)){
+	w.onKey = f
+}
 
 func (w *window)RootPane() Pane{
 	return w.rootPane

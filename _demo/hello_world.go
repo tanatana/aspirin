@@ -7,36 +7,43 @@ import (
 
 func main() {
 	asp := aspirin.NewAspirin()
+	asp.Debug = true
 
 	w := aspirin.NewWindow("", asp.Width(), asp.Height())
 	p := newHelloPane()
 	w.SetInitialPane(p)
-	asp.AddWindow(w, true)
-
-	asp.Debug = true
-
-	asp.OnKey(func(ev aspirin.Event){
-		// LATIN SMALL LETTER 'q'
-		if ev.Ch == 113 {
-			asp.Quit()
-		}
+	w.OnKey(func (ev aspirin.Event){
 		// LATIN CAPITAL LETTER 'S'
 		if ev.Ch == 83 {
 			newPane := newHelloPane()
 			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.PRVirticalSplit)
+			asp.DebugPrint("user press 'S'")
 		}
 		// LATIN SMALL LETTER 's'
 		if ev.Ch == 115 {
 			newPane := newHelloPane()
 			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.PRHorizontalSplit)
+			asp.DebugPrint("user press 's'")
 		}
 		// LATIN SMALL LETTER '['
 		if ev.Ch == 91 {
 			asp.ActiveWindow().MoveToPrevPane()
+			asp.DebugPrint("user press '['")
 		}
 		// LATIN SMALL LETTER ']'
 		if ev.Ch == 93 {
 			asp.ActiveWindow().MoveToNextPane()
+			asp.DebugPrint("user press ']'")
+		}
+	})
+	// w.Init()
+
+	asp.AddWindow(w, true)
+
+	asp.OnKey(func(ev aspirin.Event){
+		// LATIN SMALL LETTER 'q'
+		if ev.Ch == 113 {
+			asp.Quit()
 		}
 		// LATIN SMALL LETTER '{'
 		if ev.Ch == 123 {
@@ -45,20 +52,6 @@ func main() {
 		// LATIN SMALL LETTER '}'
 		if ev.Ch == 125 {
 			asp.MoveToNextWindow()
-		}
-		// LATIN SMALL LETTER 'w'
-		if ev.Ch == 119 {
-			line := aspirin.NewTextLine(fmt.Sprintf("windows: (%v)", asp.Windows()))
-			asp.ActiveWindow().ActivePane().AddLine(line, false)
-
-			line2 := aspirin.NewTextLine(fmt.Sprintf("current window: (%v)", asp.ActiveWindow()))
-			asp.ActiveWindow().ActivePane().AddLine(line2, false)
-
-		}
-
-		// LATIN SMALL LETTER 'x'
-		if ev.Ch == 120 {
-			// asp.ActiveWindow().ClosePane(asp.ActiveWindow().ActivePane())
 		}
 	})
 
@@ -73,7 +66,7 @@ func newHelloPane() aspirin.Pane{
 	p := new(HelloPane)
 	p.Init()
 	p.OnKey(func(ev aspirin.Event) {
-		line := aspirin.NewTextLine(fmt.Sprintf("Hello, world (%v)", ev))
+		line := aspirin.NewTextLine(fmt.Sprintf("%v: %v", p.Id(), ev))
 		p.AddLine(line, false)
 	})
 
@@ -83,11 +76,4 @@ func newHelloPane() aspirin.Pane{
 	})
 
 	return p
-}
-
-
-// 名前空間違うから動かないよこれ
-func (hp *HelloPane)viewDidLoad() {
-	line := aspirin.NewTextLine(fmt.Sprintf("Hello, World! (%v)", hp))
-	hp.AddLine(line, false)
 }

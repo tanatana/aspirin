@@ -19,6 +19,7 @@ type aspirin struct {
 
 
 	Debug bool
+	debugWindow *window
 }
 
 func (asp *aspirin)OnKey(f func(ev Event)){
@@ -80,10 +81,12 @@ func (asp *aspirin)findNextWindow(targetWin *window) *window{
 	panic("oops! something wrong!")
 }
 func (asp *aspirin)findPrevWindow(targetWin *window)  *window{
+	winsMaxIndex := len(asp.windows) - 1
+
 	for index, win := range asp.windows {
 		if win == targetWin {
 			if index == 0 {
-				return asp.windows[0]
+				return asp.windows[winsMaxIndex]
 			}
 			return asp.windows[index - 1]
 		}
@@ -97,10 +100,12 @@ func (asp *aspirin)ActiveWindow() *window{
 
 func (asp *aspirin)Run(){
 	if asp.Debug {
-		dw := NewWindow("debug-window", asp.Width(), asp.Height())
+		dw := NewWindow("debug", asp.Width(), asp.Height())
 		p := newDebugPane()
 		dw.SetInitialPane(p)
+		dw.Init()
 		asp.AddWindow(dw, false)
+		asp.debugWindow = dw
 	}
 
 	go setupEventLoop(asp.EventChannel)
@@ -191,6 +196,14 @@ func NewAspirinApp() *aspirin{
 
 	return ap
 }
+
+func (asp *aspirin)DebugPrint(msg string) {
+	if asp.Debug {
+		line := NewTextLine(msg)
+		asp.debugWindow.ActivePane().AddLine(line, false)
+	}
+}
+
 
 // print aspirin state for debugging
 func Print_tb(x, y int, fg, bg termbox.Attribute, msg string) {
