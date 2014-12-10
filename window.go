@@ -153,6 +153,12 @@ func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 	return sp.Right()
 }
 
+func (win *window)ClosePane(targetPane Pane) {
+	if targetPane.Parent().Role() == PRRoot {
+		panic("Oooooooops")
+	}
+}
+
 func (w *window)SetInitialPane(child Pane) {
 	child.setId(w.paneCounter)
 	child.setParent(w.rootPane)
