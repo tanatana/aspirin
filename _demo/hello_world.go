@@ -66,8 +66,16 @@ func newHelloPane() aspirin.Pane{
 	p := new(HelloPane)
 	p.Init()
 	p.OnKey(func(ev aspirin.Event) {
-		line := aspirin.NewTextLine(fmt.Sprintf("%v: %v", p.Id(), ev))
-		p.AddLine(line, false)
+		if 48 <= ev.Ch && ev.Ch <= 57 {
+			line := aspirin.NewTextLine(fmt.Sprintf("%v (active: %v)", ev, p.ActiveLineIndex()))
+			p.AddLine(line, true)
+		}
+		if ev.Ch == 106 {
+			p.MoveNextLine()
+		}
+		if ev.Ch == 107 {
+			p.MovePrevLine()
+		}
 	})
 
 	p.OnResize(func(ev aspirin.Event){

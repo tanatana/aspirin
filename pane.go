@@ -34,10 +34,11 @@ type Pane interface {
 	setParent(Pane) Pane
 
 	AddLine(l Line, setActive bool)
-	ActiveLine() Line
+	ActiveLineIndex() int
+	Lines() []Line
 	setActiveLine(Line)
-	MoveNextElement()
-	MovePrevElement()
+	MoveNextLine()
+	MovePrevLine()
 }
 
 // bbox: boundingboxとかにした方がよさそう，size，幅と高さだけっぽい
@@ -60,8 +61,8 @@ type BasePane struct{
 	left, right Pane
 	role PaneRole
 
-	rootLine Line
-	activeLine Line
+	activeLineIndex int
+	lines []Line
 
 	onKey func(ev Event)
 	onMouse func(ev Event)
@@ -77,10 +78,6 @@ func (bp *BasePane)Init() {
 	bp.onMouse = (func(ev Event){})
 	bp.onError = (func(ev Event){})
 
-	rootLineObj := newRootLine()
-	bp.rootLine = rootLineObj
-	bp.activeLine = rootLineObj
-
 	bp.eventChannel = make(chan Event)
 	go bp.setupEventLoop()
 }
@@ -92,33 +89,24 @@ func (bp *BasePane)setSize(x, y, width, height int){
 	bp.size.height = height
 }
 
-func (bp *BasePane)update(x, y int, lo Line) {
-	fgColor := termbox.ColorDefault
-	bgColor := termbox.ColorDefault
-
-	if (lo == nil) {
-		return
-	}
-
-	if (lo == bp.activeLine) {
-		fgColor = termbox.ColorWhite
-		bgColor = termbox.ColorGreen
-	}
-
-	Printf_tb(x, y, fgColor, bgColor, lo.Text())
-
-	if (lo.Next() != nil) {
-		bp.update(x, y + 1, lo.Next())
-	} else {
-		Flush()
-	}
-}
 func (bp *BasePane)Update() {
 	x := bp.size.x
 	y := bp.size.y
+ 	var fgColor termbox.Attribute
+ 	var bgColor termbox.Attribute
 
-	bp.update(x, y, bp.rootLine.Next())
+	for index, line := range bp.lines {
+		fgColor = termbox.ColorDefault
+		bgColor = termbox.ColorDefault
 
+		if bp.activeLineIndex == bp.findLine(line) {
+			fgColor = termbox.ColorWhite
+			bgColor = termbox.ColorGreen
+		}
+
+		Printf_tb(x, y + index, fgColor, bgColor, line.Text())
+	}
+	Flush()
 }
 func (bp *BasePane)viewDidLoad() {
 
@@ -165,51 +153,59 @@ func (bp *BasePane)Size() PaneSize{
 }
 
 func (bp *BasePane)AddLine(lo Line, setActive bool) {
-	ll := bp.findLastLine(bp.rootLine)
-	ll.SetNext(lo)
-	lo.SetPrev(ll)
+	bp.lines = append(bp.lines, lo)
+
 	if setActive {
-	  bp.activeLine = lo
+		bp.setActiveLine(lo)
 	}
 
 	bp.Update()
 }
-
-func (bp *BasePane)ActiveLine() Line{
-	return bp.activeLine
+func (bp *BasePane)Lines() []Line{
+	return bp.lines
+}
+func (bp *BasePane)ActiveLineIndex() int{
+	return bp.activeLineIndex
 }
 func (bp *BasePane)setActiveLine(lo Line){
-	bp.activeLine = lo
-}
-func (bp *BasePane)MoveNextElement(){
-	alo := bp.activeLine
-	nlo := alo.Next()
-	if nlo != nil {
-		bp.activeLine = nlo
+	lineIndex := bp.findLine(lo)
+	if lineIndex == -1 {
+		// do nothing
 	}
- 	bp.Update()
+	bp.activeLineIndex = lineIndex
 }
-func (bp *BasePane)MovePrevElement(){
-	alo := bp.activeLine
-	if alo.Prev() == nil {
+func (bp *BasePane)findLine(target Line) int{
+	for index, line := range bp.lines {
+		if line == target {
+			return index
+		}
+	}
+	return -1
+}
+func (bp *BasePane)MoveNextLine(){
+	if bp.activeLineIndex == len(bp.lines) - 1 {
 		return
 	}
-	plo := alo.Prev()
-	if plo != bp.rootLine {
-		bp.activeLine = plo
-	}
 
-	bp.Update()
+	bp.activeLineIndex += 1
+ 	bp.Update()
+}
+func (bp *BasePane)MovePrevLine(){
+	if bp.activeLineIndex == 0 {
+		return
+	}
+	bp.activeLineIndex -= 1
+ 	bp.Update()
 }
 
 func (bp *BasePane)findLastLine(l Line) Line{
-	var lastLine Line
-	if l.Next() != nil {
-		lastLine = bp.findLastLine(l.Next())
-	} else {
-		lastLine = l
-	}
-	return lastLine
+	// var lastLine Line
+	// if l.Next() != nil {
+	// 	lastLine = bp.findLastLine(l.Next())
+	// } else {
+	// 	lastLine = l
+	// }
+	return bp.lines[:1][0]
 }
 
 

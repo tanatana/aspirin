@@ -5,10 +5,6 @@ type Line interface {
 
 	SetAction(func(ev Event))
 	RunAction(Event)
-	SetNext(Line)
-	Next() Line
-	SetPrev(Line)
-	Prev() Line
 	SetText(string)
 	Text() string
 
@@ -18,8 +14,6 @@ type Line interface {
 type LineBase struct {
 	eventChannel chan Event
 	action func(e Event)
-	next Line
-	prev Line
 	text string
 }
 
@@ -31,19 +25,6 @@ func (lob *LineBase)RunAction(e Event)  {
 	lob.action(e)
 }
 
-
-func (lob *LineBase)SetNext(nextLineObj Line) {
-	lob.next = nextLineObj
-}
-func (lob *LineBase)Next() Line{
-	return lob.next
-}
-func (lob *LineBase)SetPrev(prevLineObj Line) {
-	lob.prev = prevLineObj
-}
-func (lob *LineBase)Prev() Line{
-	return lob.prev
-}
 func (lob *LineBase)SetText(newText string) {
 	lob.text = newText
 }
