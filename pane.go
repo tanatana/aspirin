@@ -90,12 +90,17 @@ func (bp *BasePane)setSize(x, y, width, height int){
 }
 
 func (bp *BasePane)Update() {
-	x := bp.size.x
-	y := bp.size.y
+	paneSize := bp.size
  	var fgColor termbox.Attribute
  	var bgColor termbox.Attribute
+	var line Line
 
-	for index, line := range bp.lines {
+	for index := 0; index < bp.size.height; index++ {
+		if len(bp.lines) <= index {
+			break
+		}
+
+		line = bp.lines[index]
 		fgColor = termbox.ColorDefault
 		bgColor = termbox.ColorDefault
 
@@ -104,7 +109,7 @@ func (bp *BasePane)Update() {
 			bgColor = termbox.ColorGreen
 		}
 
-		Printf_tb(x, y + index, fgColor, bgColor, line.Text())
+		Printf_tb(paneSize.x, paneSize.y + index, fgColor, bgColor, line.Text())
 	}
 	Flush()
 }
