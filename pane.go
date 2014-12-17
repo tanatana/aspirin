@@ -193,15 +193,12 @@ func (bp *BasePane)findLine(target Line) int{
 }
 
 func (bp *BasePane)MoveToLineIndex(lineIndex int){
-	// ここでbp.activeLineIndexとlineIndex，
-	// bp.topLineIndexとbp.size.heightを利用し
-	// 何行，上下のどちらにスクロールする必要があるか/ないか
-	// を決定する
 	if lineIndex < bp.topLineIndex {
 		diff := bp.topLineIndex - lineIndex
 		bp.ScrollUp(diff)
-	} else if bp.topLineIndex + bp.size.height < lineIndex {
-		diff := lineIndex - (bp.topLineIndex + bp.size.height)
+		// heightからindexに直すので-1する
+	} else if bp.topLineIndex + bp.size.height - 1 < lineIndex {
+		diff := lineIndex - (bp.topLineIndex + bp.size.height - 1)
 		bp.ScrollDown(diff)
 	}
 
