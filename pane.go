@@ -37,8 +37,11 @@ type Pane interface {
 	ActiveLineIndex() int
 	Lines() []Line
 	setActiveLine(Line)
+	MoveToLineIndex(lineIndex int)
 	MoveNextLine()
 	MovePrevLine()
+	ScrollDown(size int)
+	ScrollUp(size int)
 }
 
 // bbox: boundingboxとかにした方がよさそう，size，幅と高さだけっぽい
@@ -62,6 +65,7 @@ type BasePane struct{
 	role PaneRole
 
 	activeLineIndex int
+	topLineIndex int
 	lines []Line
 
 	onKey func(ev Event)
@@ -100,7 +104,7 @@ func (bp *BasePane)Update() {
 			break
 		}
 
-		line = bp.lines[index]
+		line = bp.lines[index + bp.topLineIndex]
 		fgColor = termbox.ColorDefault
 		bgColor = termbox.ColorDefault
 
@@ -177,7 +181,7 @@ func (bp *BasePane)setActiveLine(lo Line){
 	if lineIndex == -1 {
 		// do nothing
 	}
-	bp.activeLineIndex = lineIndex
+	bp.MoveToLineIndex(lineIndex)
 }
 func (bp *BasePane)findLine(target Line) int{
 	for index, line := range bp.lines {
@@ -187,22 +191,48 @@ func (bp *BasePane)findLine(target Line) int{
 	}
 	return -1
 }
+
+func (bp *BasePane)MoveToLineIndex(lineIndex int){
+	// ここでbp.activeLineIndexとlineIndex，
+	// bp.topLineIndexとbp.size.heightを利用し
+	// 何行，上下のどちらにスクロールする必要があるか/ないか
+	// を決定する
+	if lineIndex < bp.topLineIndex {
+		diff := bp.topLineIndex - lineIndex
+		bp.ScrollUp(diff)
+	} else if bp.topLineIndex + bp.size.height < lineIndex {
+		diff := lineIndex - (bp.topLineIndex + bp.size.height)
+		bp.ScrollDown(diff)
+	}
+
+	bp.activeLineIndex = lineIndex
+ 	bp.Update()
+}
 func (bp *BasePane)MoveNextLine(){
 	if bp.activeLineIndex == len(bp.lines) - 1 {
 		return
 	}
 
-	bp.activeLineIndex += 1
- 	bp.Update()
+	bp.MoveToLineIndex(bp.activeLineIndex + 1)
 }
 func (bp *BasePane)MovePrevLine(){
 	if bp.activeLineIndex == 0 {
 		return
 	}
-	bp.activeLineIndex -= 1
- 	bp.Update()
+	bp.MoveToLineIndex(bp.activeLineIndex - 1)
 }
-
+func (bp *BasePane)ScrollDown(size int){
+	if (bp.topLineIndex + bp.size.height < len(bp.lines)) {
+		bp.topLineIndex += 1
+	}
+}
+func (bp *BasePane)ScrollUp(size int){
+	if (bp.topLineIndex > 0) {
+		bp.topLineIndex -= size
+	} else {
+		bp.topLineIndex = 0
+	}
+}
 func (bp *BasePane)findLastLine(l Line) Line{
 	// var lastLine Line
 	// if l.Next() != nil {
