@@ -105,12 +105,12 @@ func (bp *BasePane)Update() {
 		}
 
 		line = bp.lines[index + bp.topLineIndex]
-		fgColor = termbox.ColorDefault
-		bgColor = termbox.ColorDefault
+		fgColor = line.Color().FgColor()
+		bgColor = line.Color().BgColor()
 
 		if bp.activeLineIndex == bp.findLine(line) {
-			fgColor = termbox.ColorWhite
-			bgColor = termbox.ColorGreen
+			fgColor = line.ActiveColor().fgColor
+			bgColor = line.ActiveColor().bgColor
 		}
 
 		Printf_tb(paneSize.x, paneSize.y + index, fgColor, bgColor, line.Text())

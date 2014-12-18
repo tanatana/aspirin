@@ -7,6 +7,10 @@ type Line interface {
 	RunAction(Event)
 	SetText(string)
 	Text() string
+	SetColor(*Color)
+	Color() *Color
+	SetActiveColor(*Color)
+	ActiveColor() *Color
 
 	EventChannel() chan Event
 }
@@ -15,6 +19,8 @@ type LineBase struct {
 	eventChannel chan Event
 	action func(e Event)
 	text string
+	color *Color
+	activeColor *Color
 }
 
 func (lob *LineBase)SetAction(callback func(e Event)) {
@@ -30,6 +36,18 @@ func (lob *LineBase)SetText(newText string) {
 }
 func (lob *LineBase)Text() string{
 	return lob.text
+}
+func (lob *LineBase)SetColor(c *Color){
+	lob.color = c
+}
+func (lob *LineBase)Color() *Color{
+	return lob.color
+}
+func (lob *LineBase)SetActiveColor(c *Color){
+	lob.activeColor = c
+}
+func (lob *LineBase)ActiveColor() *Color{
+	return lob.activeColor
 }
 
 

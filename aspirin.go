@@ -204,8 +204,6 @@ func (asp *aspirin)DebugPrint(msg string) {
 	}
 }
 
-
-// print aspirin state for debugging
 func Print_tb(x, y int, fg, bg termbox.Attribute, msg string) {
        for _, c := range msg {
                termbox.SetCell(x, y, c, fg, bg)
