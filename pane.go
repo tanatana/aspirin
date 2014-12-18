@@ -180,6 +180,7 @@ func (bp *BasePane)setActiveLine(lo Line){
 	lineIndex := bp.findLine(lo)
 	if lineIndex == -1 {
 		// do nothing
+		return
 	}
 	bp.MoveToLineIndex(lineIndex)
 }
@@ -196,7 +197,7 @@ func (bp *BasePane)MoveToLineIndex(lineIndex int){
 	if lineIndex < bp.topLineIndex {
 		diff := bp.topLineIndex - lineIndex
 		bp.ScrollUp(diff)
-		// heightからindexに直すので-1する
+		// heightからindexに直すので -1 してる
 	} else if bp.topLineIndex + bp.size.height - 1 < lineIndex {
 		diff := lineIndex - (bp.topLineIndex + bp.size.height - 1)
 		bp.ScrollDown(diff)

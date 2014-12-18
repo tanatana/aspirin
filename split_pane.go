@@ -1,7 +1,7 @@
 package aspirin
 
 import (
-	"fmt"
+//	"fmt"
 )
 
 type SplitPane struct {
@@ -67,6 +67,12 @@ func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, Pan
 }
 
 func (sp *SplitPane)viewDidLoad() {
-	initLine := NewTextLine(fmt.Sprintf("-"))
-	sp.AddLine(initLine, false)
+	var splitLine Line
+	if sp.role == PRHorizontalSplit{
+		splitLine = NewTextLine("-")
+		sp.AddLine(splitLine, false)
+	} else if sp.role == PRVirticalSplit {
+		splitLine = NewTextLine("|")
+		sp.AddLine(splitLine, false)
+	}
 }
