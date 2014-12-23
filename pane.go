@@ -2,6 +2,7 @@ package aspirin
 
 import (
 	"github.com/nsf/termbox-go"
+	"github.com/gfx/go-visual_width"
 //	"fmt"
 )
 
@@ -113,10 +114,7 @@ func (bp *BasePane)Update() {
 			bgColor = line.ActiveColor().bgColor
 		}
 
-		text := line.Text()
-		if len(text) > paneSize.width  {
-			text = text[:int(paneSize.width)]
-		}
+		text := visual_width.Truncate(line.Text(), true, paneSize.width, "...")
 
 		Printf_tb(paneSize.x, paneSize.y + index, fgColor, bgColor, text)
 	}

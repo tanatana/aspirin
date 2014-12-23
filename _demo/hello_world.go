@@ -25,6 +25,11 @@ func main() {
 			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.PRHorizontalSplit)
 			asp.DebugPrint("user press 's'")
 		}
+		// LATIN SMALL LETTER 'x'
+		if ev.Ch == 120 {
+			asp.ActiveWindow().ClosePane(asp.ActiveWindow().ActivePane(), true)
+			asp.DebugPrint("user press 'x'")
+		}
 		// LATIN SMALL LETTER '['
 		if ev.Ch == 91 {
 			asp.ActiveWindow().MoveToPrevPane()

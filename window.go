@@ -8,7 +8,7 @@ type window struct {
 	id int
 	title string
 	width, height int
-	paneCounter int
+	latestPaneId int // ペインを作成するたびに +1 される
 	activePane Pane
 	rootPane Pane
 	onKey func(ev Event)
@@ -36,10 +36,10 @@ func NewWindow(title string, width, height int) *window{
 	w.eventChannel = make(chan Event)
 	w.onKey = (func(e Event){})
 
-	p := newRootPane(w.paneCounter, width, height)
+	p := newRootPane(w.latestPaneId, width, height)
 	w.rootPane = p
 	w.activePane = p
-	w.paneCounter += 1
+	w.latestPaneId += 1
 
 	go w.setupEventLoop()
 
@@ -85,27 +85,34 @@ func (w *window)updateDisplayPaneList(rootPane Pane) {
 	return
 }
 func (w *window)MoveToNextPane() Pane{
+	w.activePane = w.findNextPane()
+	return w.activePane
+}
+
+func (w *window)findNextPane() Pane{
 	// FIXME: pending
 	pn := w.displayPaneList.Index(w.activePane)
 
 	if pn.next == nil {
-		return w.MoveToFirstPane()
+		return w.displayPaneList.FirstPane()
 	}
-	w.activePane = pn.NextPane()
+	return pn.NextPane()
+}
 
+func (w *window)MoveToPrevPane() Pane{
+	w.activePane = w.findPrevPane()
 	return w.activePane
 }
-func (w *window)MoveToPrevPane() Pane{
+func (w *window)findPrevPane() Pane{
 	// FIXME: pending
 	pn := w.displayPaneList.Index(w.activePane)
 
 	if pn.prev == nil {
-		return w.MoveToLastPane()
+		return w.displayPaneList.LastPane()
 	}
-	w.activePane = pn.PrevPane()
-
-	return w.activePane
+	return pn.PrevPane()
 }
+
 func (w *window)MoveToFirstPane() Pane{
 	w.activePane = w.displayPaneList.FirstPane()
 	return w.activePane
@@ -121,8 +128,8 @@ func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 	// 	panic("can't split")
 	// }
 
-	sp, leftPaneSize, rightPaneSize := NewSplitPane(win.paneCounter, targetPane, paneRole)
-	win.paneCounter += 1
+	sp, leftPaneSize, rightPaneSize := NewSplitPane(win.latestPaneId, targetPane, paneRole)
+	win.latestPaneId += 1
 
 	sp.setParent(targetPane.Parent())
 	if (targetPane.Parent().Left().Id() == targetPane.Id()) {
@@ -139,13 +146,13 @@ func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 	sp.Left().setSize(leftPaneSize.x, leftPaneSize.y, leftPaneSize.width, leftPaneSize.height);
 
 	sp.setRight(newPane)
-	sp.Right().setId(win.paneCounter);
+	sp.Right().setId(win.latestPaneId);
 	sp.Right().setSize(0, 0, win.width, win.height)
 	sp.Right().setParent(sp)
 	sp.Right().setSize(rightPaneSize.x, rightPaneSize.y, rightPaneSize.width, rightPaneSize.height);
 
 	win.activePane    = sp.Right()
-	win.paneCounter += 1
+	win.latestPaneId += 1
 
 	win.refleshDisplayPaneList()
 	newPane.viewDidLoad()
@@ -153,14 +160,60 @@ func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 	return sp.Right()
 }
 
-func (win *window)ClosePane(targetPane Pane) {
-	if targetPane.Parent().Role() == PRRoot {
-		panic("Oooooooops")
+func (win *window)ClosePane(target Pane, movePrev bool) {
+	// displayPaneListが1未満の場合ClosePane出来ない
+	if win.displayPaneList.length < 1 {
+		return
 	}
+
+	line := NewTextLine("Closed.")
+	target.AddLine(line, true)
+	var nextPane Pane
+	if movePrev {
+		nextPane = win.findPrevPane()
+	} else {
+		nextPane = win.findNextPane()
+	}
+
+	// ペインツリーの操作
+	// 対象ペインの親を取り出す
+	parent := target.Parent()
+
+	// 取り出した親から対象ペインの兄弟要素を取り出す
+	var subTreeRoot Pane
+	if parent.Left() == target {
+		subTreeRoot = parent.Right()
+	} else if parent.Right() == target {
+		subTreeRoot = parent.Left()
+	} else {
+		panic("wtf!!!")
+	}
+	// サブツリーから取り出したツリーを元のペインツリーが刺すようにする
+	superParent := parent.Parent()
+	if superParent.Right() == parent {
+		superParent.setRight(subTreeRoot)
+		subTreeRoot.setParent(superParent)
+	} else if superParent.Left() == parent {
+		superParent.setLeft(subTreeRoot)
+		subTreeRoot.setParent(superParent)
+	}
+
+	// ここまで出来たらdisplay paneリストを更新(最悪)
+	win.refleshDisplayPaneList()
+	win.activePane = nextPane
+
+	// サイズの再設定
+	// win.Resize()
+
+	// アクティブペインを移す
+	// activePane := newActivePane
+
+	// 新しいサイズでの描画
+	// win.Update()
 }
 
 func (w *window)SetInitialPane(child Pane) {
-	child.setId(w.paneCounter)
+	child.setId(w.latestPaneId)
 	child.setParent(w.rootPane)
 	child.setSize(0, 0, w.Width(), w.Height())
 
@@ -168,6 +221,6 @@ func (w *window)SetInitialPane(child Pane) {
 	w.activePane = child
 	child.viewDidLoad()
 
-	w.paneCounter += 1
+	w.latestPaneId += 1
 	w.refleshDisplayPaneList()
 }
