@@ -113,7 +113,12 @@ func (bp *BasePane)Update() {
 			bgColor = line.ActiveColor().bgColor
 		}
 
-		Printf_tb(paneSize.x, paneSize.y + index, fgColor, bgColor, line.Text())
+		text := line.Text()
+		if len(text) > paneSize.width  {
+			text = text[:int(paneSize.width)]
+		}
+
+		Printf_tb(paneSize.x, paneSize.y + index, fgColor, bgColor, text)
 	}
 	Flush()
 }

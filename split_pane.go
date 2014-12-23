@@ -71,10 +71,12 @@ func (sp *SplitPane)viewDidLoad() {
 	var splitLine Line
 	if sp.role == PRHorizontalSplit{
 		splitLine = NewTextLine(strings.Repeat("-", sp.Size().width))
+		splitLine.SetActiveColor(splitLine.Color())
 		sp.AddLine(splitLine, true)
 	} else if sp.role == PRVirticalSplit {
 		for i := 0; i < sp.Size().height; i++ {
 			splitLine = NewTextLine("|")
+			splitLine.SetActiveColor(splitLine.Color())
 			sp.AddLine(splitLine, true)
 		}
 	}
