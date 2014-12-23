@@ -2,6 +2,7 @@ package aspirin
 
 import (
 //	"fmt"
+	"strings"
 )
 
 type SplitPane struct {
@@ -69,10 +70,12 @@ func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, Pan
 func (sp *SplitPane)viewDidLoad() {
 	var splitLine Line
 	if sp.role == PRHorizontalSplit{
-		splitLine = NewTextLine("-")
-		sp.AddLine(splitLine, false)
+		splitLine = NewTextLine(strings.Repeat("-", sp.Size().width))
+		sp.AddLine(splitLine, true)
 	} else if sp.role == PRVirticalSplit {
-		splitLine = NewTextLine("|")
-		sp.AddLine(splitLine, false)
+		for i := 0; i < sp.Size().height; i++ {
+			splitLine = NewTextLine("|")
+			sp.AddLine(splitLine, true)
+		}
 	}
 }

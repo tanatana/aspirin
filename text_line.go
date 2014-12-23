@@ -18,7 +18,7 @@ func NewTextLine(text string) Line{
 	// いまの実装でそうするとスクロール時に違和感が出るので
 	// とりあえず色付けてる
 	tlo.activeColor = NewColor(termbox.ColorDefault, termbox.ColorDefault)
-	tlo.activeColor = NewColor(termbox.ColorWhite, termbox.ColorGreenq)
+	tlo.activeColor = NewColor(termbox.ColorWhite, termbox.ColorGreen)
 
 	return tlo
 }
