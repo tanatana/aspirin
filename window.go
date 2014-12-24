@@ -166,8 +166,6 @@ func (win *window)ClosePane(target Pane, movePrev bool) {
 		return
 	}
 
-	line := NewTextLine("Closed.")
-	target.AddLine(line, true)
 	var nextPane Pane
 	if movePrev {
 		nextPane = win.findPrevPane()
@@ -175,11 +173,7 @@ func (win *window)ClosePane(target Pane, movePrev bool) {
 		nextPane = win.findNextPane()
 	}
 
-	// ペインツリーの操作
-	// 対象ペインの親を取り出す
 	parent := target.Parent()
-
-	// 取り出した親から対象ペインの兄弟要素を取り出す
 	var subTreeRoot Pane
 	if parent.Left() == target {
 		subTreeRoot = parent.Right()
@@ -188,7 +182,7 @@ func (win *window)ClosePane(target Pane, movePrev bool) {
 	} else {
 		panic("wtf!!!")
 	}
-	// サブツリーから取り出したツリーを元のペインツリーが刺すようにする
+
 	superParent := parent.Parent()
 	if superParent.Right() == parent {
 		superParent.setRight(subTreeRoot)
@@ -198,7 +192,6 @@ func (win *window)ClosePane(target Pane, movePrev bool) {
 		subTreeRoot.setParent(superParent)
 	}
 
-	// ここまで出来たらdisplay paneリストを更新(最悪)
 	win.refleshDisplayPaneList()
 	win.activePane = nextPane
 
