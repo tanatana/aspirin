@@ -162,7 +162,7 @@ func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 
 func (win *window)ClosePane(target Pane, movePrev bool) {
 	// displayPaneListが1未満の場合ClosePane出来ない
-	if win.displayPaneList.length < 1 {
+	if win.displayPaneList.length <= 1 {
 		return
 	}
 
