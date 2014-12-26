@@ -155,7 +155,10 @@ func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 	win.latestPaneId += 1
 
 	win.refleshDisplayPaneList()
+
+
 	newPane.ViewDidLoad()
+	targetPane.Update()
 
 	return sp.Right()
 }

@@ -3,7 +3,7 @@ package aspirin
 import (
 	"github.com/nsf/termbox-go"
 	"github.com/gfx/go-visual_width"
-//	"fmt"
+	"strings"
 )
 
 type Pane interface {
@@ -115,13 +115,13 @@ func (bp *BasePane)Update() {
 		}
 
 		text := visual_width.Truncate(line.Text(), true, paneSize.width, "...")
-
+		// Clear brefor write
+		Printf_tb(paneSize.x, paneSize.y + index, line.Color().FgColor(), line.Color().BgColor(), strings.Repeat(" ", paneSize.width))
 		Printf_tb(paneSize.x, paneSize.y + index, fgColor, bgColor, text)
 	}
 	Flush()
 }
 func (bp *BasePane)ViewDidLoad() {
-
 }
 func (bp *BasePane)Id() int{
 	return bp.id
