@@ -1,9 +1,5 @@
 package aspirin
 
-import (
-	"fmt"
-)
-
 type RootPane struct {
 	BasePane
 }
@@ -17,8 +13,7 @@ func newRootPane(id int, width, height int) Pane{
 	return p
 }
 
-func (rp *RootPane)viewDidLoad() {
-	fmt.Printf("viewDidLoad@%s\n", "RootPane")
+func (rp *RootPane)ViewDidLoad() {
 }
 
 func (rp *RootPane)SetRight(p Pane) {

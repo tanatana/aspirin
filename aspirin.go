@@ -138,7 +138,25 @@ loop:
 
 func (asp *aspirin)RefleshScreen() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	asp.ActiveWindow().displayPaneList.ForEach(func (p Pane) {p.Update()})
+	// asp.ActiveWindow().displayPaneList.ForEach(func (p Pane) {p.ViewDidLoad()})
+	// asp.ActiveWindow().displayPaneList.ForEach(func (p Pane) {p.Update()})
+	_refleshScreen(asp.ActiveWindow().RootPane())
+}
+
+func _refleshScreen(targetPane Pane) {
+
+	targetPane.ViewDidLoad()
+	targetPane.Update()
+
+	if targetPane.Right() != nil {
+		_refleshScreen(targetPane.Right())
+	}
+
+	if targetPane.Left() != nil {
+		_refleshScreen(targetPane.Left())
+	}
+
+	return
 }
 
 func (asp *aspirin)Quit(){

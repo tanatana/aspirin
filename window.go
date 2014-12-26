@@ -138,7 +138,7 @@ func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 		sp.Parent().setRight(sp)
 	}
 
-	sp.viewDidLoad()
+	sp.ViewDidLoad()
 
 	targetPane.setParent(sp)
 
@@ -155,7 +155,7 @@ func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 	win.latestPaneId += 1
 
 	win.refleshDisplayPaneList()
-	newPane.viewDidLoad()
+	newPane.ViewDidLoad()
 
 	return sp.Right()
 }
@@ -212,7 +212,7 @@ func (w *window)SetInitialPane(child Pane) {
 
 	w.rootPane.setLeft(child)
 	w.activePane = child
-	child.viewDidLoad()
+	child.ViewDidLoad()
 
 	w.latestPaneId += 1
 	w.refleshDisplayPaneList()

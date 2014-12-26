@@ -9,8 +9,8 @@ import (
 type Pane interface {
 	Init()
 
-	viewDidLoad()
 	setupEventLoop()
+	ViewDidLoad()
 
 	OnKey(func(ev Event))
 	OnResize(func(ev Event))
@@ -120,7 +120,7 @@ func (bp *BasePane)Update() {
 	}
 	Flush()
 }
-func (bp *BasePane)viewDidLoad() {
+func (bp *BasePane)ViewDidLoad() {
 
 }
 func (bp *BasePane)Id() int{

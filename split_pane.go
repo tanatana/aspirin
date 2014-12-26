@@ -7,13 +7,17 @@ import (
 
 type SplitPane struct {
 	BasePane
+	containWidth int
+	containHeight int
+	position float32
 }
 
 func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, PaneSize, PaneSize){
-	// var sp Pane
-	// sp = new(SplitPane)
 
 	sp  := new(SplitPane)
+	sp.containWidth  = targetPane.Size().width
+	sp.containHeight =  targetPane.Size().height
+
 	var leftPaneSize, rightPaneSize PaneSize
 
 	sp.Init()
@@ -67,7 +71,7 @@ func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, Pan
 	return sp, leftPaneSize, rightPaneSize
 }
 
-func (sp *SplitPane)viewDidLoad() {
+func (sp *SplitPane)ViewDidLoad() {
 	var splitLine Line
 	if sp.role == PRHorizontalSplit{
 		splitLine = NewTextLine(strings.Repeat("-", sp.Size().width))
