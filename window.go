@@ -67,23 +67,6 @@ func (w *window)Width() int{
 func (w *window)Height() int{
 	return w.height
 }
-func (w *window)refleshDisplayPaneList() {
-	w.displayPaneList = new(paneList)
-	w.updateDisplayPaneList(w.rootPane.Left())
-}
-func (w *window)updateDisplayPaneList(rootPane Pane) {
-	if (rootPane.Left() != nil){
-		w.updateDisplayPaneList(rootPane.Left())
-	}
-	if (rootPane.Right() != nil){
-		w.updateDisplayPaneList(rootPane.Right())
-	}
-
-	if rootPane.Role() == PRDisplay {
-		w.displayPaneList.Push(rootPane)
-	}
-	return
-}
 func (w *window)MoveToNextPane() Pane{
 	w.activePane = w.findNextPane()
 	return w.activePane
@@ -128,7 +111,7 @@ func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 	// 	panic("can't split")
 	// }
 
-	sp, leftPaneSize, rightPaneSize := NewSplitPane(win.latestPaneId, targetPane, paneRole, 0.3)
+	sp, leftPaneSize, rightPaneSize := NewSplitPane(win.latestPaneId, targetPane, paneRole, 0.5)
 	// lPaneSize, rPaneSize := CalcChildrenSize(sp, 0.5)
 	win.latestPaneId += 1
 
@@ -200,7 +183,7 @@ func (win *window)ClosePane(target Pane, movePrev bool) {
 	win.activePane = nextPane
 
 	// サイズの再設定
-	// win.Resize()
+	win.RefleshWindow(win.rootPane.Left())
 
 	// アクティブペインを移す
 	// activePane := newActivePane
@@ -220,4 +203,60 @@ func (w *window)SetInitialPane(child Pane) {
 
 	w.latestPaneId += 1
 	w.refleshDisplayPaneList()
+}
+
+func (w *window)RefleshWindow(targetPane Pane) {
+	targetRole := targetPane.Role()
+	if targetRole == PRDisplay {
+		targetPane.Update()
+		return
+	}
+	if targetRole == PRRoot {
+		w.RefleshWindow(targetPane.Left())
+	}
+
+	if targetRole == PRVirticalSplit ||
+		targetRole == PRHorizontalSplit {
+
+		leftSize      := targetPane.Left().Size()
+		virtSize      := new(PaneSize)
+		virtSize.x      = leftSize.x
+		virtSize.y      = leftSize.y
+		virtSize.width  = targetPane.ContainWidth()
+		virtSize.height = targetPane.ContainHeight()
+
+		divisionPoint := targetPane.DivisionPoint()
+		spSize, lpSize, rpSize := calcSplitSize(virtSize, targetRole, divisionPoint)
+
+
+		targetPane.setSize(spSize.x, spSize.y, spSize.width, spSize.height)
+		targetPane.Left().setSize(lpSize.x, lpSize.y, lpSize.width, lpSize.height)
+		targetPane.Right().setSize(rpSize.x, rpSize.y, rpSize.width, rpSize.height)
+
+		targetPane.Update()
+
+		w.RefleshWindow(targetPane.Left())
+		w.RefleshWindow(targetPane.Right())
+
+	}
+	return
+}
+
+
+func (w *window)refleshDisplayPaneList() {
+	w.displayPaneList = new(paneList)
+	w.updateDisplayPaneList(w.rootPane.Left())
+}
+func (w *window)updateDisplayPaneList(rootPane Pane) {
+	if (rootPane.Left() != nil){
+		w.updateDisplayPaneList(rootPane.Left())
+	}
+	if (rootPane.Right() != nil){
+		w.updateDisplayPaneList(rootPane.Right())
+	}
+
+	if rootPane.Role() == PRDisplay {
+		w.displayPaneList.Push(rootPane)
+	}
+	return
 }

@@ -72,7 +72,9 @@ func newHelloPane() aspirin.Pane{
 	p.Init()
 	p.OnKey(func(ev aspirin.Event) {
 		if 48 <= ev.Ch && ev.Ch <= 57 {
-			line := aspirin.NewTextLine(fmt.Sprintf("%v (active: %v)", ev, p.ActiveLineIndex()))
+			// line := aspirin.NewTextLine(fmt.Sprintf("%v (active: %v)", ev, p))
+			// line := aspirin.NewTextLine(fmt.Sprintf("%v::%v", p.Id(), p.Size()))
+			line := aspirin.NewTextLine("Hello, world!")
 			p.AddLine(line, true)
 		}
 		if ev.Ch == 106 {
@@ -89,4 +91,21 @@ func newHelloPane() aspirin.Pane{
 	})
 
 	return p
+}
+
+func (hp *HelloPane)ViewDidLoad() {
+	hp.AddLine(aspirin.NewTextLine("Hello, world! DEMO"), false)
+	hp.AddLine(aspirin.NewTextLine(""), false)
+
+	hp.AddLine(aspirin.NewTextLine("insert something: press '0-9' key)"), false)
+	hp.AddLine(aspirin.NewTextLine("virtical split  : press 'S' key (Shift-s)"), false)
+	hp.AddLine(aspirin.NewTextLine("horizontal split: press 's' key"), false)
+	hp.AddLine(aspirin.NewTextLine("scroll up  : press 'j' key (Shift-s)"), false)
+	hp.AddLine(aspirin.NewTextLine("scroll down: press 'k' key"), false)
+
+	hp.AddLine(aspirin.NewTextLine("when there are some pains,"), false)
+	hp.AddLine(aspirin.NewTextLine("  move to next pain  : press ']' key (Shift-s)"), false)
+	hp.AddLine(aspirin.NewTextLine("  move to prev pain  : press '[' key"), false)
+
+
 }

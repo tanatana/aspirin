@@ -1,37 +1,32 @@
 package aspirin
 
 import (
-//	"fmt"
 	"strings"
 )
 
 type SplitPane struct {
 	BasePane
-	containWidth int
-	containHeight int
-	position float32
 }
 
 func NewSplitPane(splitPaneId int,targetPane Pane, splitPaneRole PaneRole, divisionPoint float32) (Pane, *PaneSize, *PaneSize){
-
 	sp := new(SplitPane)
-	sp.containWidth  = targetPane.Size().width
-	sp.containHeight = targetPane.Size().height
+	targetSize := targetPane.Size()
 
 	sp.Init()
 	sp.setId(splitPaneId)
 	sp.setRole(splitPaneRole)
 
+	sp.setContainWidth(targetSize.width)
+	sp.setContainHeight(targetSize.height)
+	sp.setDivisionPoint(divisionPoint)
 
-	spSize, lpSize, rpSize := calcSplitSize(targetPane.Size(), splitPaneRole, divisionPoint)
+	spSize, lpSize, rpSize := calcSplitSize(targetSize, splitPaneRole, divisionPoint)
 	sp.setSize(spSize.x, spSize.y, spSize.width, spSize.height)
 
-
 	return sp, lpSize, rpSize
-//	return sp, leftPaneSize, rightPaneSize
 }
 
-func calcSplitSize(targetSize PaneSize,  splitPaneRole PaneRole, divisionPoint float32) (spSize, leftSize, rightSize *PaneSize){
+func calcSplitSize(targetSize *PaneSize,  splitPaneRole PaneRole, divisionPoint float32) (spSize, leftSize, rightSize *PaneSize){
 
 	spSize    = new(PaneSize)
 	leftSize  = new(PaneSize)
@@ -42,8 +37,6 @@ func calcSplitSize(targetSize PaneSize,  splitPaneRole PaneRole, divisionPoint f
 		spSize.y      = targetSize.y
 		spSize.width  = 1
 		spSize.height = targetSize.height
-
-//		sp.setSize(spX, spY, spWidth, spHeight)
 
 		leftSize.x       = targetSize.x
 		leftSize.y       = targetSize.y
@@ -64,8 +57,6 @@ func calcSplitSize(targetSize PaneSize,  splitPaneRole PaneRole, divisionPoint f
 		spSize.width  = targetSize.width
 		spSize.height = 1
 
-//		sp.setSize(spX, spY, spWidth, spHeight)
-
 		leftSize.x       = targetSize.x
 		leftSize.y       = targetSize.y
 		leftSize.width   = targetSize.width
@@ -84,15 +75,11 @@ func calcSplitSize(targetSize PaneSize,  splitPaneRole PaneRole, divisionPoint f
 	return
 }
 
-func approximationDivisionPoint(lines int, divisionPoint float32) (approximatedDivisionPoint float32) {
-	return
-}
-
-
 func (sp *SplitPane)ViewDidLoad() {
 	var splitLine Line
 	if sp.role == PRHorizontalSplit{
 		splitLine = NewTextLine(strings.Repeat("-", sp.Size().width))
+		// splitLine = NewTextLine(fmt.Sprintf("%v", sp))
 		splitLine.SetActiveColor(splitLine.Color())
 		sp.AddLine(splitLine, true)
 	} else if sp.role == PRVirticalSplit {

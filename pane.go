@@ -31,8 +31,15 @@ type Pane interface {
 	Right() Pane
 	setRight(Pane) Pane
 	Parent() Pane
-	Size() PaneSize
+	Size() *PaneSize
 	setParent(Pane) Pane
+
+	ContainWidth() int
+	setContainWidth(int) int
+	ContainHeight() int
+	setContainHeight(int) int
+	DivisionPoint() float32
+	setDivisionPoint(float32) float32
 
 	AddLine(l Line, setActive bool)
 	ActiveLineIndex() int
@@ -60,7 +67,7 @@ const (
 
 type BasePane struct{
 	id int
-	size PaneSize
+	size *PaneSize
 	parent Pane
 	left, right Pane
 	role PaneRole
@@ -74,6 +81,11 @@ type BasePane struct{
 	onResize func(ev Event)
 	onError func(ev Event)
 	eventChannel chan Event
+
+	// for split pane
+	containWidth  int
+	containHeight int
+	divisionPoint float32
 }
 
 func (bp *BasePane)Init() {
@@ -85,13 +97,6 @@ func (bp *BasePane)Init() {
 
 	bp.eventChannel = make(chan Event)
 	go bp.setupEventLoop()
-}
-
-func (bp *BasePane)setSize(x, y, width, height int){
-	bp.size.x = x
-	bp.size.y = y
-	bp.size.width = width
-	bp.size.height = height
 }
 
 func (bp *BasePane)Update() {
@@ -160,8 +165,38 @@ func (bp *BasePane)setParent(p Pane) Pane{
 	bp.parent = p
 	return bp.parent
 }
-func (bp *BasePane)Size() PaneSize{
+func (bp *BasePane)Size() *PaneSize{
 	return bp.size
+}
+func (bp *BasePane)setSize(x, y, width, height int){
+	bp.size = new(PaneSize)
+	bp.size.x = x
+	bp.size.y = y
+	bp.size.width = width
+	bp.size.height = height
+}
+
+// for split pane
+func (bp *BasePane)ContainWidth() int{
+	return bp.containWidth
+}
+func (bp *BasePane)setContainWidth(width int) int{
+	bp.containWidth = width
+	return bp.containWidth
+}
+func (bp *BasePane)ContainHeight() int{
+	return bp.containHeight
+}
+func (bp *BasePane)setContainHeight(height int) int{
+	bp.containHeight = height
+	return bp.containHeight
+}
+func (bp *BasePane)DivisionPoint() float32{
+	return bp.divisionPoint
+}
+func (bp *BasePane)setDivisionPoint(point float32) float32{
+	bp.divisionPoint = point
+	return bp.divisionPoint
 }
 
 func (bp *BasePane)AddLine(lo Line, setActive bool) {
