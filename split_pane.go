@@ -12,68 +12,74 @@ type SplitPane struct {
 	position float32
 }
 
-func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole, divisionPoint float32) (Pane, PaneSize, PaneSize){
+func NewSplitPane(splitPaneId int,targetPane Pane, splitPaneRole PaneRole, divisionPoint float32) (Pane, *PaneSize, *PaneSize){
 
-	sp  := new(SplitPane)
+	sp := new(SplitPane)
 	sp.containWidth  = targetPane.Size().width
-	sp.containHeight =  targetPane.Size().height
-
-	var leftPaneSize, rightPaneSize PaneSize
+	sp.containHeight = targetPane.Size().height
 
 	sp.Init()
 	sp.setId(splitPaneId)
-	sp.setRole(paneRole)
+	sp.setRole(splitPaneRole)
 
-	if (paneRole == PRVirticalSplit) {
-		spX := targetPane.Size().x + int(float32(targetPane.Size().width) * divisionPoint)
-		spY := targetPane.Size().y
-		spWidth := 1
-		spHeight := targetPane.Size().height
 
-		sp.setSize(spX, spY, spWidth, spHeight)
+	spSize, lpSize, rpSize := calcSplitSize(targetPane.Size(), splitPaneRole, divisionPoint)
+	sp.setSize(spSize.x, spSize.y, spSize.width, spSize.height)
 
-		leftPaneSize.x       = targetPane.Size().x
-		leftPaneSize.y       = targetPane.Size().y
-		leftPaneSize.width   = int(float32(targetPane.Size().width) * divisionPoint)
-		leftPaneSize.height  = targetPane.Size().height
 
-		rightPaneSize.x      = spX + spWidth
-		rightPaneSize.y      = spY
-		rightPaneSize.width  = int(float32(targetPane.Size().width) * (1 - divisionPoint)) - spWidth
-		rightPaneSize.height = targetPane.Size().height
-
-		if (targetPane.Size().width % 2 == 1) {
-			rightPaneSize.width += spWidth
-		}
-	} else if (paneRole == PRHorizontalSplit) {
-		spX := targetPane.Size().x
-		spY := targetPane.Size().y + int(float32(targetPane.Size().height) * divisionPoint)
-		spWidth := targetPane.Size().width
-		spHeight := 1
-
-		sp.setSize(spX, spY, spWidth, spHeight)
-
-		leftPaneSize.x       = targetPane.Size().x
-		leftPaneSize.y       = targetPane.Size().y
-		leftPaneSize.width   = targetPane.Size().width
-		leftPaneSize.height  = int(float32(targetPane.Size().height) * divisionPoint)
-
-		rightPaneSize.x      = spX
-		rightPaneSize.y      = spY + spHeight
-		rightPaneSize.width  = targetPane.Size().width
-		rightPaneSize.height = int(float32(targetPane.Size().height) * (1 - divisionPoint)) - spHeight
-
-		if (targetPane.Size().height % 2 == 1) {
-			rightPaneSize.height += spHeight
-		}
-	}
-
-	return sp, leftPaneSize, rightPaneSize
+	return sp, lpSize, rpSize
+//	return sp, leftPaneSize, rightPaneSize
 }
 
-func CalcChildrenSize(target Pane, divisionPoint float32) (leftPaneSize, rightPaneSize *PaneSize){
-	leftPaneSize  = new(PaneSize)
-	rightPaneSize = new(PaneSize)
+func calcSplitSize(targetSize PaneSize,  splitPaneRole PaneRole, divisionPoint float32) (spSize, leftSize, rightSize *PaneSize){
+
+	spSize    = new(PaneSize)
+	leftSize  = new(PaneSize)
+	rightSize = new(PaneSize)
+
+	if (splitPaneRole == PRVirticalSplit) {
+		spSize.x      = targetSize.x + int(float32(targetSize.width) * divisionPoint)
+		spSize.y      = targetSize.y
+		spSize.width  = 1
+		spSize.height = targetSize.height
+
+//		sp.setSize(spX, spY, spWidth, spHeight)
+
+		leftSize.x       = targetSize.x
+		leftSize.y       = targetSize.y
+		leftSize.width   = int(float32(targetSize.width) * divisionPoint)
+		leftSize.height  = targetSize.height
+
+		rightSize.x      = spSize.x + spSize.width
+		rightSize.y      = spSize.y
+		rightSize.width  = int(float32(targetSize.width) * (1 - divisionPoint)) - spSize.width
+		rightSize.height = targetSize.height
+
+		if (targetSize.width % 2 == 1) {
+			rightSize.width += spSize.width
+		}
+	} else if (splitPaneRole == PRHorizontalSplit) {
+		spSize.x      = targetSize.x
+		spSize.y      = targetSize.y + int(float32(targetSize.height) * divisionPoint)
+		spSize.width  = targetSize.width
+		spSize.height = 1
+
+//		sp.setSize(spX, spY, spWidth, spHeight)
+
+		leftSize.x       = targetSize.x
+		leftSize.y       = targetSize.y
+		leftSize.width   = targetSize.width
+		leftSize.height  = int(float32(targetSize.height) * divisionPoint)
+
+		rightSize.x      = spSize.x
+		rightSize.y      = spSize.y + spSize.height
+		rightSize.width  = targetSize.width
+		rightSize.height = int(float32(targetSize.height) * (1 - divisionPoint)) - spSize.height
+
+		if (targetSize.height % 2 == 1) {
+			rightSize.height += spSize.height
+		}
+	}
 
 	return
 }
