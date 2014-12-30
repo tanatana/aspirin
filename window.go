@@ -128,7 +128,8 @@ func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
 	// 	panic("can't split")
 	// }
 
-	sp, leftPaneSize, rightPaneSize := NewSplitPane(win.latestPaneId, targetPane, paneRole)
+	sp, leftPaneSize, rightPaneSize := NewSplitPane(win.latestPaneId, targetPane, paneRole, 0.3)
+	// lPaneSize, rPaneSize := CalcChildrenSize(sp, 0.5)
 	win.latestPaneId += 1
 
 	sp.setParent(targetPane.Parent())

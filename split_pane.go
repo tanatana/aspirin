@@ -12,7 +12,7 @@ type SplitPane struct {
 	position float32
 }
 
-func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, PaneSize, PaneSize){
+func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole, divisionPoint float32) (Pane, PaneSize, PaneSize){
 
 	sp  := new(SplitPane)
 	sp.containWidth  = targetPane.Size().width
@@ -25,7 +25,7 @@ func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, Pan
 	sp.setRole(paneRole)
 
 	if (paneRole == PRVirticalSplit) {
-		spX := targetPane.Size().x + targetPane.Size().width/2
+		spX := targetPane.Size().x + int(float32(targetPane.Size().width) * divisionPoint)
 		spY := targetPane.Size().y
 		spWidth := 1
 		spHeight := targetPane.Size().height
@@ -34,12 +34,12 @@ func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, Pan
 
 		leftPaneSize.x       = targetPane.Size().x
 		leftPaneSize.y       = targetPane.Size().y
-		leftPaneSize.width   = targetPane.Size().width/2
+		leftPaneSize.width   = int(float32(targetPane.Size().width) * divisionPoint)
 		leftPaneSize.height  = targetPane.Size().height
 
 		rightPaneSize.x      = spX + spWidth
 		rightPaneSize.y      = spY
-		rightPaneSize.width  = targetPane.Size().width/2 - spWidth
+		rightPaneSize.width  = int(float32(targetPane.Size().width) * (1 - divisionPoint)) - spWidth
 		rightPaneSize.height = targetPane.Size().height
 
 		if (targetPane.Size().width % 2 == 1) {
@@ -47,7 +47,7 @@ func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, Pan
 		}
 	} else if (paneRole == PRHorizontalSplit) {
 		spX := targetPane.Size().x
-		spY := targetPane.Size().y + targetPane.Size().height/2
+		spY := targetPane.Size().y + int(float32(targetPane.Size().height) * divisionPoint)
 		spWidth := targetPane.Size().width
 		spHeight := 1
 
@@ -56,12 +56,12 @@ func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, Pan
 		leftPaneSize.x       = targetPane.Size().x
 		leftPaneSize.y       = targetPane.Size().y
 		leftPaneSize.width   = targetPane.Size().width
-		leftPaneSize.height  = targetPane.Size().height/2
+		leftPaneSize.height  = int(float32(targetPane.Size().height) * divisionPoint)
 
 		rightPaneSize.x      = spX
 		rightPaneSize.y      = spY + spHeight
 		rightPaneSize.width  = targetPane.Size().width
-		rightPaneSize.height = targetPane.Size().height/2 - spHeight
+		rightPaneSize.height = int(float32(targetPane.Size().height) * (1 - divisionPoint)) - spHeight
 
 		if (targetPane.Size().height % 2 == 1) {
 			rightPaneSize.height += spHeight
@@ -70,6 +70,18 @@ func NewSplitPane(splitPaneId int,targetPane Pane, paneRole PaneRole) (Pane, Pan
 
 	return sp, leftPaneSize, rightPaneSize
 }
+
+func CalcChildrenSize(target Pane, divisionPoint float32) (leftPaneSize, rightPaneSize *PaneSize){
+	leftPaneSize  = new(PaneSize)
+	rightPaneSize = new(PaneSize)
+
+	return
+}
+
+func approximationDivisionPoint(lines int, divisionPoint float32) (approximatedDivisionPoint float32) {
+	return
+}
+
 
 func (sp *SplitPane)ViewDidLoad() {
 	var splitLine Line
