@@ -1,319 +1,262 @@
 package aspirin
 
+import (
+	"github.com/nsf/termbox-go"
+)
+
 type window struct {
 	id int
-	activePane *pane
 	title string
 	width, height int
-	rootPane *pane
-	paneCounter int
+	latestPaneId int // ペインを作成するたびに +1 される
+	activePane Pane
+	rootPane Pane
+	onKey func(ev Event)
+	eventChannel chan Event
+	displayPaneList *paneList
 }
 
-func newWindow(id int, title string, width, height int) *window{
-	// TODO: create mini-pane like emacs's mini-buffer
-	w        := new(window)
-	w.id      = id
-	w.title   = title
-	w.width   = width
-	w.height  = height
-	w.paneCounter = 0
-	w.initializePaneTree()
+func (w *window)setupEventLoop() {
+	for {
+		ev := <- w.eventChannel
+		switch ev.Type {
+		case termbox.EventKey:
+			go w.onKey(ev)
+		}
+		w.activePane.EventChannel() <- ev
+	}
+}
+
+func NewWindow(title string, width, height int) *window{
+	w             := new(window)
+	w.title        = title
+	w.width        = width
+	w.height       = height
+
+	w.eventChannel = make(chan Event)
+	w.onKey = (func(e Event){})
+
+	p := newRootPane(w.latestPaneId, width, height)
+	w.rootPane = p
+	w.activePane = p
+	w.latestPaneId += 1
+
+	go w.setupEventLoop()
 
 	return w
 }
-
-func (win *window)GetRootPane() *pane{
-	return win.rootPane
+func (w *window)Init() {
+	go w.setupEventLoop()
+}
+func (w *window)OnKey(f func(ev Event)){
+	w.onKey = f
 }
 
-func (win *window)GetActivePane() *pane{
-	return win.activePane
+func (w *window)RootPane() Pane{
+	return w.rootPane
 }
 
-func (win *window)SetActivePane(id int) *pane{
-	// concretePaneいがいがActivePaneになるの許可しない方がよさそう
-	targetPane := findPaneById(win.rootPane, id)
-	if(targetPane == nil){
-		return nil
+func (w *window)ActivePane() Pane{
+	return w.activePane
+}
+
+func (w *window)Width() int{
+	return w.width
+}
+
+func (w *window)Height() int{
+	return w.height
+}
+func (w *window)MoveToNextPane() Pane{
+	w.activePane = w.findNextPane()
+	return w.activePane
+}
+
+func (w *window)findNextPane() Pane{
+	// FIXME: pending
+	pn := w.displayPaneList.Index(w.activePane)
+
+	if pn.next == nil {
+		return w.displayPaneList.FirstPane()
 	}
-
-	win.activePane = targetPane
-	return win.activePane
+	return pn.NextPane()
 }
 
-func  (win *window)SetSize(width, height int) *window{
-	// miniPane実装後はこうなるはず
-	// win.width  = width - win.miniPane.height
-	win.width  = width
-	win.height = height
-	return win
+func (w *window)MoveToPrevPane() Pane{
+	w.activePane = w.findPrevPane()
+	return w.activePane
+}
+func (w *window)findPrevPane() Pane{
+	// FIXME: pending
+	pn := w.displayPaneList.Index(w.activePane)
+
+	if pn.prev == nil {
+		return w.displayPaneList.LastPane()
+	}
+	return pn.PrevPane()
 }
 
-func (win *window)ClosePane(target *pane) {
-	parent := target.parent
-	if (parent.paneType == RootPane) {
-		// TODO: エラーどうしよ
-		panic("can't split")
-	}
-	newParent := parent.parent
-	keep := parent.left
+func (w *window)MoveToFirstPane() Pane{
+	w.activePane = w.displayPaneList.FirstPane()
+	return w.activePane
+}
+func (w *window)MoveToLastPane()  Pane{
+	w.activePane = w.displayPaneList.LastPane()
+	return w.activePane
+}
 
-	if keep.id == target.id {
-		 keep = parent.right
-	}
+func (win *window)SplitPane(targetPane, newPane Pane, paneRole PaneRole) Pane{
+	// if (targetPane.parent == nil) {
+	// 	// TODO: エラーどうしよ
+	// 	panic("can't split")
+	// }
 
-	// merge adjoining pane
-	newPaneSize := calcMergedPaneSize(target, keep, parent)
-	keep.setSize(newPaneSize.width, newPaneSize.height)
-	keep.setPosition(newPaneSize.x, newPaneSize.y)
-	if newParent.left.id == parent.id {
-	    newParent.left = keep
+	sp, leftPaneSize, rightPaneSize := NewSplitPane(win.latestPaneId, targetPane, paneRole, 0.5)
+	// lPaneSize, rPaneSize := CalcChildrenSize(sp, 0.5)
+	win.latestPaneId += 1
+
+	sp.setParent(targetPane.Parent())
+	if (targetPane.Parent().Left().Id() == targetPane.Id()) {
+		sp.Parent().setLeft(sp)
 	} else {
-	    newParent.right = keep
+		sp.Parent().setRight(sp)
 	}
 
-	keep.parent = newParent
-	win.activePane = keep
+	sp.ViewDidLoad()
+
+	targetPane.setParent(sp)
+
+	sp.setLeft(targetPane)
+	sp.Left().setSize(leftPaneSize.x, leftPaneSize.y, leftPaneSize.width, leftPaneSize.height);
+
+	sp.setRight(newPane)
+	sp.Right().setId(win.latestPaneId);
+	sp.Right().setSize(0, 0, win.width, win.height)
+	sp.Right().setParent(sp)
+	sp.Right().setSize(rightPaneSize.x, rightPaneSize.y, rightPaneSize.width, rightPaneSize.height);
+
+	win.activePane    = sp.Right()
+	win.latestPaneId += 1
+
+	win.refleshDisplayPaneList()
+
+
+	newPane.ViewDidLoad()
+	targetPane.Update()
+
+	return sp.Right()
 }
 
-func (win *window)MoveToNextPane() *pane{
-	nextPane := findNextPane(win.GetActivePane())
-	if nextPane == nil {
-		nextPane = findFirstPane(win.rootPane)
+func (win *window)ClosePane(target Pane, movePrev bool) {
+	// displayPaneListが1未満の場合ClosePane出来ない
+	if win.displayPaneList.length <= 1 {
+		return
 	}
+
+	var nextPane Pane
+	if movePrev {
+		nextPane = win.findPrevPane()
+	} else {
+		nextPane = win.findNextPane()
+	}
+
+	parent := target.Parent()
+	var subTreeRoot Pane
+	if parent.Left() == target {
+		subTreeRoot = parent.Right()
+	} else if parent.Right() == target {
+		subTreeRoot = parent.Left()
+	} else {
+		panic("wtf!!!")
+	}
+
+	superParent := parent.Parent()
+	if superParent.Right() == parent {
+		superParent.setRight(subTreeRoot)
+		subTreeRoot.setParent(superParent)
+	} else if superParent.Left() == parent {
+		superParent.setLeft(subTreeRoot)
+		subTreeRoot.setParent(superParent)
+	}
+
+	win.refleshDisplayPaneList()
 	win.activePane = nextPane
 
-	return win.activePane
+	// サイズの再設定
+	win.RefleshWindow(win.rootPane.Left())
+
+	// アクティブペインを移す
+	// activePane := newActivePane
+
+	// 新しいサイズでの描画
+	// win.Update()
 }
 
-func (win *window)MoveToPrevPane() *pane{
-	prevPane := findPrevPane(win.GetActivePane())
-	if prevPane == nil {
-		prevPane = findLastPane(win.rootPane)
-	}
-	win.activePane = prevPane
-	return win.activePane
+func (w *window)SetInitialPane(child Pane) {
+	child.setId(w.latestPaneId)
+	child.setParent(w.rootPane)
+	child.setSize(0, 0, w.Width(), w.Height())
+
+	w.rootPane.setLeft(child)
+	w.activePane = child
+	child.ViewDidLoad()
+
+	w.latestPaneId += 1
+	w.refleshDisplayPaneList()
 }
 
-func (win *window)MoveToPane(targetId int) {
-}
-
-func (win *window)SplitPane(targetPane *pane, splitType SplitType) *pane{
-	if (targetPane.paneType == RootPane) {
-		// TODO: エラーどうしよ
-		panic("can't split")
+func (w *window)RefleshWindow(targetPane Pane) {
+	targetRole := targetPane.Role()
+	if targetRole == PRDisplay {
+		targetPane.Update()
+		return
 	}
-	var sp *pane
-	var leftPaneSize, rightPaneSize PaneSize
-
-	if (splitType == VirticalSplit) {
-		sp = newPane(win.paneCounter, VirticalSplitPane, targetPane.x + targetPane.width/2, targetPane.y, 1, targetPane.height)
-
-		leftPaneSize.x       = targetPane.x
-		leftPaneSize.y       = targetPane.y
-		leftPaneSize.width   = targetPane.width/2
-		leftPaneSize.height  = targetPane.height
-
-		rightPaneSize.x      = targetPane.x + targetPane.width/2 + 1
-		rightPaneSize.y      = targetPane.y
-		rightPaneSize.width  = targetPane.width/2 - 1
-		rightPaneSize.height = targetPane.height
-
-		if (targetPane.width % 2 == 1) {
-			rightPaneSize.width += 1
-		}
-
-
-	} else if (splitType == HorizontalSplit) {
-		sp = newPane(win.paneCounter, HorizontalSplitPane, targetPane.x, targetPane.y + targetPane.height/2, targetPane.width, 1)
-		leftPaneSize.x       = targetPane.x
-		leftPaneSize.y       = targetPane.y
-		leftPaneSize.width   = targetPane.width
-		leftPaneSize.height  = targetPane.height/2
-
-		rightPaneSize.x      = targetPane.x
-		rightPaneSize.y      = targetPane.y + targetPane.height/2 + 1
-		rightPaneSize.width  = targetPane.width
-		rightPaneSize.height = targetPane.height/2 - 1
-
-		if (targetPane.height % 2 == 1) {
-			rightPaneSize.height += 1
-		}
-	}
-	win.activePane   = sp
-	win.paneCounter += 1
-
-	sp.parent = targetPane.parent
-	if (targetPane.parent.left.id == targetPane.id) {
-		sp.parent.left  = sp
-	} else {
-		sp.parent.right = sp
-	}
-	targetPane.parent = sp
-	sp.left           = targetPane
-	sp.left.setSize(leftPaneSize.width, leftPaneSize.height);
-	sp.left.setPosition(leftPaneSize.x, leftPaneSize.y);
-	sp.right          = newPane(win.paneCounter, ConcretePane, 0, 0, win.width, win.height)
-	sp.right.parent   = sp
-	sp.right.setSize(rightPaneSize.width, rightPaneSize.height);
-	sp.right.setPosition(rightPaneSize.x, rightPaneSize.y);
-	win.activePane    = sp.right
-	win.paneCounter += 1
-
-	return sp.right
-}
-
-
-func (win *window)initializePaneTree() {
-	rp := win.createRootPane()
-	win.rootPane = rp
-	win.createConcretePane(rp)
-}
-
-func (win *window)createRootPane() *pane{
-	rp := newPane(win.paneCounter, RootPane, 0, 0, win.width, win.height)
-
-	win.activePane   = rp
-	win.paneCounter += 1
-	return rp
-}
-
-func (win *window)createConcretePane(targetPane *pane) *pane{
-	if (targetPane.paneType == ConcretePane) {
-		// TODO: エラーを返す???
-		return nil
+	if targetRole == PRRoot {
+		w.RefleshWindow(targetPane.Left())
 	}
 
-	p :=  newPane(win.paneCounter, ConcretePane, 0, 0, win.width, win.height)
-	p.parent = targetPane
+	if targetRole == PRVirticalSplit ||
+		targetRole == PRHorizontalSplit {
 
-	if (targetPane.left == nil || targetPane.paneType == RootPane) {
-		targetPane.left = p
-	} else {
-		targetPane.right = p
-	}
+		leftSize      := targetPane.Left().Size()
+		virtSize      := new(PaneSize)
+		virtSize.x      = leftSize.x
+		virtSize.y      = leftSize.y
+		virtSize.width  = targetPane.ContainWidth()
+		virtSize.height = targetPane.ContainHeight()
 
-	win.activePane  = p
-	win.paneCounter += 1
-	return p
-}
+		divisionPoint := targetPane.DivisionPoint()
+		spSize, lpSize, rpSize := calcSplitSize(virtSize, targetRole, divisionPoint)
 
-func (win *window)refleshPaneTree(rootPane *pane) {
-	rootPane.reflesh()
-	if (rootPane.left != nil){
-		win.refleshPaneTree(rootPane.left)
-	}
-	if (rootPane.right != nil){
-		win.refleshPaneTree(rootPane.right)
+
+		targetPane.setSize(spSize.x, spSize.y, spSize.width, spSize.height)
+		targetPane.Left().setSize(lpSize.x, lpSize.y, lpSize.width, lpSize.height)
+		targetPane.Right().setSize(rpSize.x, rpSize.y, rpSize.width, rpSize.height)
+
+		targetPane.Update()
+
+		w.RefleshWindow(targetPane.Left())
+		w.RefleshWindow(targetPane.Right())
+
 	}
 	return
 }
 
-func (win *window)refleshPane(targetPane *pane) {
-	targetPane.reflesh()
+
+func (w *window)refleshDisplayPaneList() {
+	w.displayPaneList = new(paneList)
+	w.updateDisplayPaneList(w.rootPane.Left())
 }
-
-func calcMergedPaneSize(target, bro, parent *pane) PaneSize{
-	var size PaneSize
-	if (target.x < bro.x) {
-		size.x = target.x
-	} else {
-		size.x = bro.x
+func (w *window)updateDisplayPaneList(rootPane Pane) {
+	if (rootPane.Left() != nil){
+		w.updateDisplayPaneList(rootPane.Left())
+	}
+	if (rootPane.Right() != nil){
+		w.updateDisplayPaneList(rootPane.Right())
 	}
 
-	if (target.y < bro.y) {
-		size.y = target.y
-	} else {
-		size.y = bro.y
+	if rootPane.Role() == PRDisplay {
+		w.displayPaneList.Push(rootPane)
 	}
-
-
-	if (target.x == bro.x) {
-		size.width = target.width
-		size.height = target.height + bro.height + parent.height
-	} else {
-		size.width = target.width + bro.width + parent.width
-		size.height = target.height
-	}
-
-	return size
-}
-
-func findPaneById(targetPane *pane, id int) *pane{
-	if (targetPane.id == id) {
-		return targetPane
-	}
-
-	if (targetPane.left != nil){
-		return findPaneById(targetPane.left, id)
-	}
-	if (targetPane.right != nil){
-		return findPaneById(targetPane.right, id)
-	}
-	return nil
-}
-
-func findNextPane(target *pane) *pane{
-	parent := target.parent
-
-	if parent.paneType == RootPane {
-		return nil
-	}
-
-	if parent.left.id == target.id {
-		if parent.right.paneType == VirticalSplitPane ||
-			parent.right.paneType == HorizontalSplitPane {
-			return findPrevPane(parent.right)
-		} else {
-			return parent.right
-		}
-	}
-
-	if parent.right.id == target.id {
-		return findNextPane(parent)
-	}
-	panic("something wrong")
-}
-
-func findPrevPane(target *pane) *pane{
-	parent := target.parent
-
-	if parent.paneType == RootPane {
-		return nil
-	}
-
-	if parent.right.id == target.id {
-		if parent.left.paneType == VirticalSplitPane ||
-			parent.left.paneType == HorizontalSplitPane {
-			return findPrevPane(parent.left)
-		} else {
-			return parent.left
-		}
-	}
-
-	if parent.left.id == target.id {
-		return findPrevPane(parent)
-	}
-	panic("something wrong")
-}
-
-func findFirstPane(target *pane) *pane{
-	if target.left.paneType == VirticalSplitPane ||
-		target.left.paneType == HorizontalSplitPane {
-		return findFirstPane(target.left)
-	}
-	return target.left
-}
-func findLastPane(target *pane) *pane{
-	if target.right != nil {
-		if target.right.paneType == VirticalSplitPane ||
-			target.right.paneType == HorizontalSplitPane {
-			return findLastPane(target.right)
-		}
-		return target.right
-	} else if target.left.paneType == VirticalSplitPane ||
-		target.left.paneType == HorizontalSplitPane {
-		return findLastPane(target.left)
-	}
-	return target.left
+	return
 }

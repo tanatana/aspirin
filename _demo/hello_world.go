@@ -1,73 +1,111 @@
 package main
 
 import (
-	"fmt"
-	"github.com/nsf/termbox-go"
 	"../../aspirin"
+	"fmt"
 )
 
-func print_tb(x, y int, fg, bg termbox.Attribute, msg string) {
-	for _, c := range msg {
-		termbox.SetCell(x, y, c, fg, bg)
-		x++
-	}
-}
-
-func printf_tb(x, y int, fg, bg termbox.Attribute, format string, args ...interface{}) {
-	s := fmt.Sprintf(format, args...)
-	print_tb(x, y, fg, bg, s)
-}
-
 func main() {
-	// termbox の初期化
-	err := termbox.Init()
-	if err != nil {
-		fmt.Printf("%v", err)
-		panic(err)
-	}
-	defer termbox.Close()
-	width, height := termbox.Size()
+	asp := aspirin.NewAspirin()
+	asp.Debug = true
 
-	asp := aspirin.NewAspirin(width, height)
-	// asp.CreateWindow("test")
-	// tmux で例えると `C-t %` => `C-t "` => `C-t o` => `C-t "`
-	// asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.VirticalSplit)
-	//
-	// asp.GetActiveWindow().SetActivePane(1)
-	// asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.HorizontalSplit)
-	asp.Reflesh()
-	asp.DrawStatus()
-
-loop:
-	for {
-		win := asp.GetActiveWindow()
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
-			printf_tb(0, 20, termbox.ColorDefault, termbox.ColorDefault, "%s", string(ev.Ch))
-			printf_tb(0, 21, termbox.ColorDefault, termbox.ColorDefault, "%d", ev.Ch)
-			if ev.Ch == 34 {
-				// HorizontalSplit
-				asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.HorizontalSplit)
-			}
-			if ev.Ch == 37 {
-				// VerticalSplit
-				asp.GetActiveWindow().SplitPane(asp.GetActiveWindow().GetActivePane(), aspirin.VirticalSplit)
-			}
-			if ev.Ch == 91 {
-				win.MoveToPrevPane()
-			}
-			if ev.Ch == 93 {
-				win.MoveToNextPane()
-			}
-			if ev.Ch == 120 {
-				// close pane when press 'x'
-				win.ClosePane(win.GetActivePane())
-			}
-			if ev.Ch == 113 {
-				break loop
-			}
-			asp.Reflesh()
-			asp.DrawStatus()
+	w := aspirin.NewWindow("", asp.Width(), asp.Height())
+	p := newHelloPane()
+	w.SetInitialPane(p)
+	w.OnKey(func (ev aspirin.Event){
+		// LATIN CAPITAL LETTER 'S'
+		if ev.Ch == 83 {
+			newPane := newHelloPane()
+			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.PRVirticalSplit)
+			asp.DebugPrint("user press 'S'")
 		}
-	}
+		// LATIN SMALL LETTER 's'
+		if ev.Ch == 115 {
+			newPane := newHelloPane()
+			asp.ActiveWindow().SplitPane(asp.ActiveWindow().ActivePane(), newPane, aspirin.PRHorizontalSplit)
+			asp.DebugPrint("user press 's'")
+		}
+		// LATIN SMALL LETTER 'x'
+		if ev.Ch == 120 {
+			asp.ActiveWindow().ClosePane(asp.ActiveWindow().ActivePane(), true)
+			asp.DebugPrint("user press 'x'")
+		}
+		// LATIN SMALL LETTER '['
+		if ev.Ch == 91 {
+			asp.ActiveWindow().MoveToPrevPane()
+			asp.DebugPrint("user press '['")
+		}
+		// LATIN SMALL LETTER ']'
+		if ev.Ch == 93 {
+			asp.ActiveWindow().MoveToNextPane()
+			asp.DebugPrint("user press ']'")
+		}
+	})
+	// w.Init()
+
+	asp.AddWindow(w, true)
+
+	asp.OnKey(func(ev aspirin.Event){
+		// LATIN SMALL LETTER 'q'
+		if ev.Ch == 113 {
+			asp.Quit()
+		}
+		// LATIN SMALL LETTER '{'
+		if ev.Ch == 123 {
+			asp.MoveToPrevWindow()
+		}
+		// LATIN SMALL LETTER '}'
+		if ev.Ch == 125 {
+			asp.MoveToNextWindow()
+		}
+	})
+
+	asp.Run()
+}
+
+type HelloPane struct {
+	aspirin.BasePane
+}
+
+func newHelloPane() aspirin.Pane{
+	p := new(HelloPane)
+	p.Init()
+	p.OnKey(func(ev aspirin.Event) {
+		if 48 <= ev.Ch && ev.Ch <= 57 {
+			// line := aspirin.NewTextLine(fmt.Sprintf("%v (active: %v)", ev, p))
+			// line := aspirin.NewTextLine(fmt.Sprintf("%v::%v", p.Id(), p.Size()))
+			line := aspirin.NewTextLine("Hello, world!")
+			p.AddLine(line, true)
+		}
+		if ev.Ch == 106 {
+			p.MoveNextLine()
+		}
+		if ev.Ch == 107 {
+			p.MovePrevLine()
+		}
+	})
+
+	p.OnResize(func(ev aspirin.Event){
+		line := aspirin.NewTextLine(fmt.Sprintf("terminal resized (%v)", ev))
+		p.AddLine(line, false)
+	})
+
+	return p
+}
+
+func (hp *HelloPane)ViewDidLoad() {
+	hp.AddLine(aspirin.NewTextLine("Hello, world! DEMO"), false)
+	hp.AddLine(aspirin.NewTextLine(""), false)
+
+	hp.AddLine(aspirin.NewTextLine("insert something: press '0-9' key)"), false)
+	hp.AddLine(aspirin.NewTextLine("virtical split  : press 'S' key (Shift-s)"), false)
+	hp.AddLine(aspirin.NewTextLine("horizontal split: press 's' key"), false)
+	hp.AddLine(aspirin.NewTextLine("scroll up  : press 'j' key (Shift-s)"), false)
+	hp.AddLine(aspirin.NewTextLine("scroll down: press 'k' key"), false)
+
+	hp.AddLine(aspirin.NewTextLine("when there are some pains,"), false)
+	hp.AddLine(aspirin.NewTextLine("  move to next pain  : press ']' key (Shift-s)"), false)
+	hp.AddLine(aspirin.NewTextLine("  move to prev pain  : press '[' key"), false)
+
+
 }
