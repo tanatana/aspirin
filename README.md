@@ -1,6 +1,6 @@
 # ASPIRIN
 
-go package for build awsome Text-based User Interface application.
+Aspirin helps building Text-based user interface with go Aspirin
 
 ## run demo
 
