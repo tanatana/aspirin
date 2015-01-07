@@ -2,16 +2,16 @@
 
 Aspirin helps building Text-based user interface with go Aspirin
 
+## demo
+
+<iframe width="420" height="315" src="//www.youtube.com/embed/0AUvY7cfMj0?rel=0" frameborder="0" allowfullscreen></iframe>
+
 ## run demo
 
 ```
+1. $ go get github.com/tanatana/aspirin
 
-1. $ git clone <aspirin repository URI>
-
-2. $ cd aspirin
-
-3. $ go run _demo/hello_world.go
-
+2. $ go run $GOPATH/src/github.com/tanatana/aspirin/_demo/hello_world.go
 ```
 
 ## See also
