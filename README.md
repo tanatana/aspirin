@@ -4,7 +4,7 @@ Aspirin helps building Text-based user interface with go Aspirin
 
 ## demo
 
-<iframe width="420" height="315" src="//www.youtube.com/embed/0AUvY7cfMj0?rel=0" frameborder="0" allowfullscreen></iframe>
+http://youtu.be/0AUvY7cfMj0
 
 ## run demo
 
